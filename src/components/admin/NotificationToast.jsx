@@ -18,30 +18,6 @@ const NOTIFICATION_TYPES = {
     borderColor: 'border-blue-200',
     title: 'Nuevo Pago Confirmado',
     sound: 'success'
-  },
-  sistema: {
-    icon: AlertCircle,
-    color: 'from-amber-400 to-orange-500',
-    bgColor: 'from-amber-50 to-orange-50',
-    borderColor: 'border-amber-200',
-    title: 'Alerta del Sistema',
-    sound: 'warning'
-  },
-  stock_bajo: {
-    icon: Package,
-    color: 'from-red-400 to-pink-500',
-    bgColor: 'from-red-50 to-pink-50',
-    borderColor: 'border-red-200',
-    title: 'Stock Bajo',
-    sound: 'warning'
-  },
-  error_pago: {
-    icon: AlertCircle,
-    color: 'from-red-500 to-rose-600',
-    bgColor: 'from-red-50 to-rose-50',
-    borderColor: 'border-red-300',
-    title: 'Error de Pago',
-    sound: 'error'
   }
 }
 

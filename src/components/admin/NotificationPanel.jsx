@@ -33,30 +33,6 @@ const NOTIFICATION_TYPES = {
     hoverBg: 'hover:bg-blue-100/50',
     title: 'Pago Confirmado',
     description: 'Pago procesado exitosamente'
-  },
-  sistema: {
-    icon: AlertCircle,
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-50 border-amber-100',
-    hoverBg: 'hover:bg-amber-100/50',
-    title: 'Sistema',
-    description: 'Notificación del sistema'
-  },
-  stock_bajo: {
-    icon: Package,
-    color: 'text-red-600',
-    bgColor: 'bg-red-50 border-red-100',
-    hoverBg: 'hover:bg-red-100/50',
-    title: 'Stock Bajo',
-    description: 'Producto con stock crítico'
-  },
-  error_pago: {
-    icon: AlertCircle,
-    color: 'text-red-600',
-    bgColor: 'bg-red-50 border-red-100',
-    hoverBg: 'hover:bg-red-100/50',
-    title: 'Error de Pago',
-    description: 'Problema con procesamiento de pago'
   }
 }
 

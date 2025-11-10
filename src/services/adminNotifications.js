@@ -123,13 +123,24 @@ export function disconnectAdminNotifications() {
  */
 export async function getAdminNotificationsHistory(page = 1, limit = 20) {
   try {
-    const response = await axios.get(`${API_URL}/api/admin/notificaciones/historial/`, {
+    const response = await axios.get(`${API_URL}/api/notificaciones/historial/`, {
       params: { page, limit },
       headers: {
         'Authorization': `Token ${localStorage.getItem('auth_token')}`
       }
     })
-    return response.data
+
+    // Filtrar solo notificaciones de compras para administradores
+    const allNotifications = response.data
+    if (allNotifications.results) {
+      allNotifications.results = allNotifications.results.filter(notification =>
+        notification.tipo === 'nueva_compra' || notification.tipo === 'nuevo_pago'
+      )
+      // Recalcular el count
+      allNotifications.count = allNotifications.results.length
+    }
+
+    return allNotifications
   } catch (error) {
     console.error('Error obteniendo historial de notificaciones:', error)
     throw error
@@ -147,9 +158,16 @@ export async function getUnreadAdminNotifications() {
         'Authorization': `Token ${localStorage.getItem('auth_token')}`
       }
     })
+
+    // Filtrar solo notificaciones de compras para administradores
+    const allNotifications = response.data.results || []
+    const purchaseNotifications = allNotifications.filter(notification =>
+      notification.tipo === 'nueva_compra' || notification.tipo === 'nuevo_pago'
+    )
+
     return {
-      count: response.data.count || response.data.results?.length || 0,
-      results: response.data.results || []
+      count: purchaseNotifications.length,
+      results: purchaseNotifications
     }
   } catch (error) {
     console.error('Error obteniendo notificaciones no leídas:', error)

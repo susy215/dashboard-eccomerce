@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login.jsx'
-import AdminLayout from './layouts/AdminLayout'
+import DashboardWithNotifications from './components/DashboardWithNotifications'
 
 function RequireAuth({ children }) {
   const location = useLocation()
@@ -20,9 +20,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/" element={
           <RequireAuth>
-            <AdminLayout>
-              <Dashboard />
-            </AdminLayout>
+            <DashboardWithNotifications />
           </RequireAuth>
         } />
         <Route path="*" element={<Navigate to="/" replace />} />
