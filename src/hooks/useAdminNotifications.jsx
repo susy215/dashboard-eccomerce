@@ -15,6 +15,66 @@ export function useAdminNotifications(token) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const connectionRef = useRef(null)
+  const lastNotificationIdRef = useRef(null)
+  const pollIntervalRef = useRef(null)
+
+  // Sistema de polling inteligente para detectar nuevas compras/pagos
+  const startSmartPolling = useCallback(() => {
+    if (pollIntervalRef.current) return
+
+    console.log('🚀 Iniciando polling inteligente para compras/pagos...')
+
+    const pollForNewEvents = async () => {
+      try {
+        const data = await getUnreadAdminNotifications()
+
+        if (data.results && data.results.length > 0) {
+          // Filtrar solo compras y pagos que no hayamos visto antes
+          const newPurchases = data.results.filter(notification => {
+            const isPurchaseOrPayment = notification.tipo === 'nueva_compra' || notification.tipo === 'nuevo_pago'
+            const isNew = !lastNotificationIdRef.current || notification.id > lastNotificationIdRef.current
+
+            return isPurchaseOrPayment && isNew
+          })
+
+          if (newPurchases.length > 0) {
+            console.log('🛒 ¡Detectadas nuevas compras/pagos!', newPurchases.length)
+
+            // Agregar las nuevas notificaciones
+            setNotifications(prev => [...newPurchases, ...prev])
+            setUnreadCount(prev => prev + newPurchases.length)
+
+            // Actualizar el ID más alto visto
+            const maxId = Math.max(...newPurchases.map(n => n.id))
+            lastNotificationIdRef.current = Math.max(lastNotificationIdRef.current || 0, maxId)
+
+            // Mostrar notificaciones del navegador para eventos nuevos
+            newPurchases.forEach(notification => {
+              if ('Notification' in window && Notification.permission === 'granted') {
+                showBrowserNotification(notification)
+              }
+            })
+
+            // Reproducir sonido
+            if (newPurchases.length > 0) {
+              playNotificationSound()
+            }
+          }
+
+          // Actualizar conteo total de no leídas
+          setUnreadCount(data.results.length)
+        }
+      } catch (error) {
+        console.error('Error en polling inteligente:', error)
+      }
+    }
+
+    // Polling inicial
+    pollForNewEvents()
+
+    // Configurar polling continuo cada 10 segundos (más frecuente para compras)
+    pollIntervalRef.current = setInterval(pollForNewEvents, 10000)
+  }, [])
 
   // Conectar al sistema de notificaciones
   const connect = useCallback(() => {
@@ -48,12 +108,15 @@ export function useAdminNotifications(token) {
       connectionRef.current = setupAdminNotificationSystem(handleMessage, handleError, token)
       setIsConnected(true) // En polling HTTP, consideramos "conectado" = true
       setError(null)
+
+      // Iniciar polling inteligente para compras/pagos
+      startSmartPolling()
     } catch (err) {
       console.error('Error conectando a notificaciones:', err)
       setError(err)
       setIsConnected(false)
     }
-  }, [token])
+  }, [token, startSmartPolling])
 
   // Desconectar
   const disconnect = useCallback(() => {
@@ -62,6 +125,14 @@ export function useAdminNotifications(token) {
       connectionRef.current = null
       setIsConnected(false)
     }
+
+    // Limpiar polling inteligente
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current)
+      pollIntervalRef.current = null
+    }
+
+    lastNotificationIdRef.current = null
   }, [])
 
   // Cargar historial

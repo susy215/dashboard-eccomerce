@@ -4,6 +4,7 @@ import KpiCards from '../components/KpiCards';
 import SalesLine from '../components/SalesLine';
 import CategoryBar from '../components/CategoryBar';
 import TopList from '../components/TopList';
+import NotificationBadge from '../components/admin/NotificationBadge';
 
 export default function Dashboard() {
   const token = localStorage.getItem('token');
@@ -60,15 +61,15 @@ export default function Dashboard() {
               </h1>
               <p className="text-slate-400 text-sm mt-0.5">Dashboard Analítico en Tiempo Real</p>
             </div>
-            <div className="flex items-center gap-2 fade-in">
+            <div className="flex items-center gap-3 fade-in">
               <div className="inline-flex rounded-xl border border-white/10 bg-slate-900/60 backdrop-blur-sm p-1 shadow-lg">
                 {[7, 30, 90].map((d) => (
-                  <button 
-                    key={d} 
-                    onClick={() => setDias(d)} 
+                  <button
+                    key={d}
+                    onClick={() => setDias(d)}
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 ${
-                      dias === d 
-                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30' 
+                      dias === d
+                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30'
                         : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
                     }`}
                   >
@@ -76,13 +77,20 @@ export default function Dashboard() {
                   </button>
                 ))}
               </div>
-              <select 
-                value={limit} 
-                onChange={(e) => setLimit(Number(e.target.value))} 
+              <select
+                value={limit}
+                onChange={(e) => setLimit(Number(e.target.value))}
                 className="rounded-xl border border-white/10 bg-slate-900/60 backdrop-blur-sm text-slate-200 text-sm px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
               >
                 {[5, 10, 15].map((l) => <option key={l} value={l}>Top {l}</option>)}
               </select>
+
+              {/* Notification Badge integrado en el header */}
+              <NotificationBadge
+                token={token}
+                onClick={() => window.dispatchEvent(new CustomEvent('openNotifications'))}
+                className="!relative !top-0 !right-0 !fixed"
+              />
             </div>
           </div>
         </div>
