@@ -141,15 +141,20 @@ export async function getAdminNotificationsHistory(page = 1, limit = 20) {
  */
 export async function getUnreadAdminNotifications() {
   try {
-    const response = await axios.get(`${API_URL}/api/admin/notificaciones/no-leidas/`, {
+    // Usar endpoint correcto según API disponible
+    const response = await axios.get(`${API_URL}/api/notificaciones/historial/?leida=false`, {
       headers: {
         'Authorization': `Token ${localStorage.getItem('auth_token')}`
       }
     })
-    return response.data
+    return {
+      count: response.data.count || response.data.results?.length || 0,
+      results: response.data.results || []
+    }
   } catch (error) {
     console.error('Error obteniendo notificaciones no leídas:', error)
-    throw error
+    // Retornar datos vacíos en caso de error
+    return { count: 0, results: [] }
   }
 }
 
@@ -193,6 +198,12 @@ export async function markAllNotificationsAsRead() {
  * Configurar sistema de notificaciones con fallback automático
  */
 export function setupAdminNotificationSystem(onMessage, onError, token) {
+  // Por ahora solo usar polling HTTP ya que el backend no tiene WebSocket/SSE
+  console.log('🚀 Usando polling HTTP (backend no tiene WebSocket/SSE implementado)...')
+  return setupPollingAdmin(onMessage, onError, token)
+
+  // Código comentado para cuando el backend implemente WebSocket/SSE:
+  /*
   // Intentar WebSocket primero
   if ('WebSocket' in window) {
     console.log('🚀 Intentando conectar con WebSocket...')
@@ -210,6 +221,7 @@ export function setupAdminNotificationSystem(onMessage, onError, token) {
   // Último fallback: polling HTTP
   console.log('🚀 Usando polling HTTP como fallback...')
   return setupPollingAdmin(onMessage, onError, token)
+  */
 }
 
 /**
@@ -242,8 +254,8 @@ function setupPollingAdmin(onMessage, onError, token) {
     }
   }
 
-  // Iniciar polling cada 30 segundos
-  pollInterval = setInterval(poll, 30000)
+  // Iniciar polling cada 15 segundos (más responsivo)
+  pollInterval = setInterval(poll, 15000)
 
   // Primera verificación inmediata
   poll()

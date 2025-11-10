@@ -31,9 +31,8 @@ export default function NotificationBadge({ token, onClick, className = '' }) {
 
         {/* Indicador de conexión */}
         <div className={`
-          absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white
-          ${isConnected ? 'bg-green-400 shadow-green-200' : 'bg-gray-300'}
-          shadow-lg
+          absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white shadow-lg
+          ${isConnected ? 'bg-blue-400 shadow-blue-200 animate-pulse' : 'bg-gray-300'}
         `} />
       </div>
 
@@ -88,8 +87,8 @@ export default function NotificationBadge({ token, onClick, className = '' }) {
 
         {/* Estado de conexión */}
         <div className="flex items-center gap-2 mt-1 text-xs text-gray-300">
-          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-gray-400'}`} />
-          <span>{isConnected ? 'Conectado' : 'Desconectado'}</span>
+          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-blue-400' : 'bg-gray-400'}`} />
+          <span>{isConnected ? 'HTTP Polling' : 'Desconectado'}</span>
         </div>
       </div>
 

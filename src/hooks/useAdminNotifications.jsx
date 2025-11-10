@@ -46,11 +46,12 @@ export function useAdminNotifications(token) {
 
     try {
       connectionRef.current = setupAdminNotificationSystem(handleMessage, handleError, token)
-      setIsConnected(true)
+      setIsConnected(true) // En polling HTTP, consideramos "conectado" = true
       setError(null)
     } catch (err) {
       console.error('Error conectando a notificaciones:', err)
       setError(err)
+      setIsConnected(false)
     }
   }, [token])
 
