@@ -5,17 +5,17 @@ import { useAdminNotifications } from '../../hooks/useAdminNotifications'
 const NOTIFICATION_TYPES = {
   nueva_compra: {
     icon: ShoppingCart,
-    color: 'from-green-400 to-emerald-500',
-    bgColor: 'from-green-50 to-emerald-50',
-    borderColor: 'border-green-200',
+    color: 'from-green-500 to-emerald-600',
+    bgColor: 'from-slate-900/95 to-slate-800/95',
+    borderColor: 'border-green-500/20',
     title: 'Nueva Compra',
     sound: 'success'
   },
   nuevo_pago: {
     icon: CreditCard,
-    color: 'from-blue-400 to-cyan-500',
-    bgColor: 'from-blue-50 to-cyan-50',
-    borderColor: 'border-blue-200',
+    color: 'from-blue-500 to-cyan-600',
+    bgColor: 'from-slate-900/95 to-slate-800/95',
+    borderColor: 'border-blue-500/20',
     title: 'Nuevo Pago Confirmado',
     sound: 'success'
   }
@@ -94,11 +94,11 @@ export default function NotificationToast({ token }) {
             id={`notification-${notification.id}`}
             className={`
               relative group pointer-events-auto
-              bg-white/95 backdrop-blur-sm
-              rounded-2xl shadow-xl border border-white/20
+              bg-gradient-to-br ${typeConfig.bgColor} backdrop-blur-xl
+              rounded-2xl shadow-2xl border ${typeConfig.borderColor}
               overflow-hidden cursor-pointer
               transform transition-all duration-300 ease-out
-              hover:scale-[1.02] hover:shadow-2xl
+              hover:scale-[1.02] hover:shadow-blue-500/20
               animate-in slide-in-from-right-2 fade-in
             `}
             style={{
@@ -123,16 +123,16 @@ export default function NotificationToast({ token }) {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-bold text-base text-gray-900 mb-1 leading-tight">
+                  <h4 className="font-bold text-base text-slate-200 mb-1 leading-tight">
                     {typeConfig.title}
                   </h4>
-                  <p className="text-sm text-gray-700 leading-relaxed mb-3 line-clamp-2">
+                  <p className="text-sm text-slate-300 leading-relaxed mb-3 line-clamp-2">
                     {notification.mensaje || notification.body}
                   </p>
 
                   {/* Metadata */}
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-gray-500 font-medium">
+                    <p className="text-xs text-slate-400 font-medium">
                       {new Date(notification.creada || notification.fecha).toLocaleTimeString('es-ES', {
                         hour: '2-digit',
                         minute: '2-digit'
@@ -142,7 +142,7 @@ export default function NotificationToast({ token }) {
                     {/* Indicador de tipo */}
                     <div className="flex items-center gap-1">
                       <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${typeConfig.color}`} />
-                      <span className="text-xs text-gray-400 uppercase tracking-wide font-semibold">
+                      <span className="text-xs text-slate-500 uppercase tracking-wide font-semibold">
                         {notification.tipo?.replace('_', ' ')}
                       </span>
                     </div>
@@ -157,19 +157,19 @@ export default function NotificationToast({ token }) {
                   }}
                   className="
                     flex-shrink-0 w-8 h-8 rounded-xl
-                    hover:bg-gray-100 active:bg-gray-200
+                    hover:bg-slate-700/60 active:bg-slate-600/80
                     flex items-center justify-center
                     transition-all duration-200
                     opacity-0 group-hover:opacity-100
                     transform translate-x-2 group-hover:translate-x-0
                   "
                 >
-                  <X className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+                  <X className="w-4 h-4 text-slate-400 hover:text-slate-200" />
                 </button>
               </div>
 
               {/* Barra de progreso para auto-cierre */}
-              <div className="mt-4 h-1 bg-gray-100 rounded-full overflow-hidden">
+              <div className="mt-4 h-1 bg-slate-700/50 rounded-full overflow-hidden">
                 <div
                   className={`h-full bg-gradient-to-r ${typeConfig.color} rounded-full transition-all duration-75 ease-linear`}
                   style={{
@@ -187,8 +187,8 @@ export default function NotificationToast({ token }) {
 
       {/* Indicador de notificaciones adicionales */}
       {visibleNotifications.length > 4 && (
-        <div className="bg-gray-900/90 backdrop-blur-sm text-white rounded-2xl p-4 shadow-xl border border-gray-700/50 text-center">
-          <Bell className="w-5 h-5 mx-auto mb-2 opacity-70" />
+        <div className="bg-slate-900/90 backdrop-blur-xl text-slate-200 rounded-2xl p-4 shadow-2xl border border-white/10 text-center">
+          <Bell className="w-5 h-5 mx-auto mb-2 opacity-70 text-blue-400" />
           <p className="text-sm font-medium">
             +{visibleNotifications.length - 4} notificaciones más
           </p>

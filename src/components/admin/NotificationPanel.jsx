@@ -20,17 +20,17 @@ import { useAdminNotifications } from '../../hooks/useAdminNotifications'
 const NOTIFICATION_TYPES = {
   nueva_compra: {
     icon: ShoppingCart,
-    color: 'text-green-600',
-    bgColor: 'bg-green-50 border-green-100',
-    hoverBg: 'hover:bg-green-100/50',
+    color: 'text-green-400',
+    bgColor: 'bg-green-500/20 border border-green-500/30',
+    hoverBg: 'hover:bg-green-500/30',
     title: 'Nueva Compra',
     description: 'Cliente realizó una compra'
   },
   nuevo_pago: {
     icon: CreditCard,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50 border-blue-100',
-    hoverBg: 'hover:bg-blue-100/50',
+    color: 'text-blue-400',
+    bgColor: 'bg-blue-500/20 border border-blue-500/30',
+    hoverBg: 'hover:bg-blue-500/30',
     title: 'Pago Confirmado',
     description: 'Pago procesado exitosamente'
   }
@@ -87,32 +87,32 @@ export default function NotificationPanel({ token, isOpen, onClose }) {
     <div className="fixed inset-0 z-50 flex animate-in fade-in duration-200">
       {/* Overlay con blur */}
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
 
       {/* Panel */}
       <div className="
         relative ml-auto w-full max-w-lg
-        bg-white/95 backdrop-blur-xl
-        shadow-2xl border-l border-white/20
+        bg-slate-900/95 backdrop-blur-xl
+        shadow-2xl border-l border-white/10
         flex flex-col
         transform transition-transform duration-300 ease-out
         translate-x-0
       ">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100/80 bg-gradient-to-r from-white to-gray-50/50">
+        <div className="flex items-center justify-between p-6 border-b border-white/10 bg-gradient-to-r from-slate-800/60 to-slate-900/60">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <BellRing className="w-7 h-7 text-blue-600" />
+              <BellRing className="w-7 h-7 text-blue-400" />
               {isConnected && (
-                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white" />
+                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-400 rounded-full border-2 border-slate-900 shadow-lg" />
               )}
             </div>
             <div>
-              <h2 className="font-bold text-xl text-gray-900">Notificaciones</h2>
-              <p className="text-sm text-gray-600">
-                {isConnected ? 'Conectado en tiempo real' : 'Modo offline'}
+              <h2 className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400">Notificaciones</h2>
+              <p className="text-sm text-slate-400">
+                {isConnected ? 'HTTP Polling activo' : 'Modo offline'}
               </p>
             </div>
           </div>
@@ -121,21 +121,24 @@ export default function NotificationPanel({ token, isOpen, onClose }) {
             onClick={onClose}
             className="
               w-10 h-10 rounded-xl
-              hover:bg-gray-100 active:bg-gray-200
+              bg-slate-800/60 backdrop-blur-sm border border-white/10
+              hover:bg-slate-700/80 hover:border-white/20
+              active:bg-slate-600/80
               flex items-center justify-center
               transition-all duration-200
               transform hover:scale-110
+              shadow-lg
             "
           >
-            <X className="w-5 h-5 text-gray-500" />
+            <X className="w-5 h-5 text-slate-400 hover:text-slate-200" />
           </button>
         </div>
 
         {/* Barra de búsqueda y filtros */}
-        <div className="p-4 border-b border-gray-100/80 bg-gray-50/30">
+        <div className="p-4 border-b border-white/10 bg-slate-800/30">
           <div className="flex gap-3 mb-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
                 placeholder="Buscar notificaciones..."
@@ -143,10 +146,10 @@ export default function NotificationPanel({ token, isOpen, onClose }) {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="
                   w-full pl-10 pr-4 py-2.5
-                  bg-white border border-gray-200 rounded-xl
-                  focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400
-                  transition-all duration-200 text-sm
-                  placeholder-gray-400
+                  bg-slate-900/60 backdrop-blur-sm border border-white/10 rounded-xl
+                  focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400/50
+                  transition-all duration-200 text-sm text-slate-200
+                  placeholder-slate-400
                 "
               />
             </div>
@@ -154,15 +157,17 @@ export default function NotificationPanel({ token, isOpen, onClose }) {
               onClick={handleRefresh}
               disabled={loading}
               className="
-                p-2.5 rounded-xl bg-white border border-gray-200
-                hover:bg-gray-50 active:bg-gray-100
+                p-2.5 rounded-xl bg-slate-900/60 backdrop-blur-sm border border-white/10
+                hover:bg-slate-800/80 hover:border-white/20
+                active:bg-slate-700/80
                 disabled:opacity-50 disabled:cursor-not-allowed
                 transition-all duration-200
                 transform hover:scale-105 active:scale-95
+                shadow-lg
               "
               title="Actualizar"
             >
-              <RefreshCw className={`w-4 h-4 text-gray-600 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 text-slate-400 hover:text-slate-200 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
 
@@ -174,8 +179,8 @@ export default function NotificationPanel({ token, isOpen, onClose }) {
                 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap
                 transition-all duration-200 transform hover:scale-105 active:scale-95
                 ${selectedType === 'all'
-                  ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/30'
+                  : 'bg-slate-900/60 backdrop-blur-sm text-slate-400 border border-white/10 hover:bg-slate-800/80 hover:text-slate-200 hover:border-white/20'
                 }
               `}
             >
@@ -190,8 +195,8 @@ export default function NotificationPanel({ token, isOpen, onClose }) {
                   transition-all duration-200 transform hover:scale-105 active:scale-95
                   flex items-center gap-1.5
                   ${selectedType === key
-                    ? `${config.bgColor} ${config.color} border border-current`
-                    : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/30'
+                    : 'bg-slate-900/60 backdrop-blur-sm text-slate-400 border border-white/10 hover:bg-slate-800/80 hover:text-slate-200 hover:border-white/20'
                   }
                 `}
               >
@@ -203,15 +208,15 @@ export default function NotificationPanel({ token, isOpen, onClose }) {
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-100/80 bg-white">
+        <div className="flex border-b border-white/10 bg-slate-800/30">
           <button
             onClick={() => setActiveTab('all')}
             className={`
               flex-1 py-4 px-6 text-sm font-semibold transition-all duration-200
               relative overflow-hidden
               ${activeTab === 'all'
-                ? 'text-blue-600 bg-blue-50/50'
-                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50/50'
+                ? 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-400'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/30'
               }
             `}
           >
@@ -219,14 +224,14 @@ export default function NotificationPanel({ token, isOpen, onClose }) {
             <span className={`
               ml-2 px-2 py-0.5 rounded-full text-xs font-bold
               ${activeTab === 'all'
-                ? 'bg-blue-200 text-blue-700'
-                : 'bg-gray-200 text-gray-600'
+                ? 'bg-blue-500/30 text-blue-300'
+                : 'bg-slate-700 text-slate-400'
               }
             `}>
               {notifications.length}
             </span>
             {activeTab === 'all' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-cyan-500" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-cyan-400" />
             )}
           </button>
           <button
@@ -235,8 +240,8 @@ export default function NotificationPanel({ token, isOpen, onClose }) {
               flex-1 py-4 px-6 text-sm font-semibold transition-all duration-200
               relative overflow-hidden
               ${activeTab === 'unread'
-                ? 'text-blue-600 bg-blue-50/50'
-                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50/50'
+                ? 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-400'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/30'
               }
             `}
           >
@@ -245,22 +250,22 @@ export default function NotificationPanel({ token, isOpen, onClose }) {
               <span className={`
                 ml-2 px-2 py-0.5 rounded-full text-xs font-bold
                 ${activeTab === 'unread'
-                  ? 'bg-red-200 text-red-700'
-                  : 'bg-red-100 text-red-600'
+                  ? 'bg-red-500/30 text-red-300'
+                  : 'bg-slate-700 text-slate-400'
                 }
               `}>
                 {unreadCount}
               </span>
             )}
             {activeTab === 'unread' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-cyan-500" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400 to-cyan-400" />
             )}
           </button>
         </div>
 
         {/* Actions */}
         {unreadCount > 0 && (
-          <div className="p-4 border-b border-gray-100/80 bg-gradient-to-r from-blue-50/30 to-cyan-50/30">
+          <div className="p-4 border-b border-white/10 bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
             <button
               onClick={handleMarkAllAsRead}
               className="
@@ -272,7 +277,7 @@ export default function NotificationPanel({ token, isOpen, onClose }) {
                 active:scale-95
                 transition-all duration-200
                 transform hover:scale-[1.02]
-                shadow-lg hover:shadow-xl
+                shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50
               "
             >
               <CheckCheck className="w-4 h-4" />
@@ -285,21 +290,21 @@ export default function NotificationPanel({ token, isOpen, onClose }) {
         <div className="flex-1 overflow-y-auto">
           {loading && notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 px-6">
-              <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin mb-4" />
-              <p className="text-gray-600 font-medium">Cargando notificaciones...</p>
+              <div className="w-12 h-12 border-4 border-blue-400/30 border-t-blue-400 rounded-full animate-spin mb-4" />
+              <p className="text-slate-400 font-medium">Cargando notificaciones...</p>
             </div>
           ) : filteredNotifications.length === 0 ? (
             <div className="text-center py-12 px-6">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-2xl flex items-center justify-center">
-                <Bell className="w-8 h-8 text-gray-400" />
+              <div className="w-16 h-16 mx-auto mb-4 bg-slate-800/60 rounded-2xl flex items-center justify-center">
+                <Bell className="w-8 h-8 text-slate-400" />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">
+              <h3 className="font-semibold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400 mb-2">
                 {searchTerm || selectedType !== 'all'
                   ? 'No se encontraron notificaciones'
                   : 'Sin notificaciones'
                 }
               </h3>
-              <p className="text-gray-600 text-sm">
+              <p className="text-slate-400 text-sm">
                 {searchTerm || selectedType !== 'all'
                   ? 'Prueba con otros filtros de búsqueda'
                   : 'Las nuevas notificaciones aparecerán aquí'
@@ -307,7 +312,7 @@ export default function NotificationPanel({ token, isOpen, onClose }) {
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100/80">
+            <div className="divide-y divide-white/10">
               {filteredNotifications.map((notification) => {
                 const typeConfig = NOTIFICATION_TYPES[notification.tipo] ||
                                   NOTIFICATION_TYPES.sistema
@@ -317,11 +322,11 @@ export default function NotificationPanel({ token, isOpen, onClose }) {
                   <div
                     key={notification.id}
                     className={`
-                      p-5 hover:bg-gray-50/80 active:bg-gray-100/80
+                      p-5 hover:bg-slate-700/30 active:bg-slate-600/50
                       cursor-pointer transition-all duration-200
                       border-l-4 transform hover:translate-x-1
                       ${!notification.leida
-                        ? 'border-l-blue-500 bg-gradient-to-r from-blue-50/30 to-transparent'
+                        ? 'border-l-blue-400 bg-gradient-to-r from-blue-500/10 to-transparent'
                         : 'border-l-transparent'
                       }
                     `}
@@ -342,10 +347,10 @@ export default function NotificationPanel({ token, isOpen, onClose }) {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-bold text-base text-gray-900 leading-tight mb-1">
+                            <h4 className="font-bold text-base text-slate-200 leading-tight mb-1">
                               {notification.titulo || typeConfig.title}
                             </h4>
-                            <p className="text-sm text-gray-700 leading-relaxed line-clamp-2">
+                            <p className="text-sm text-slate-300 leading-relaxed line-clamp-2">
                               {notification.mensaje || notification.body}
                             </p>
                           </div>
@@ -353,13 +358,13 @@ export default function NotificationPanel({ token, isOpen, onClose }) {
                           {/* Estado de lectura */}
                           {!notification.leida && (
                             <div className="flex-shrink-0 ml-3">
-                              <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
+                              <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse" />
                             </div>
                           )}
                         </div>
 
                         {/* Metadata */}
-                        <div className="flex items-center justify-between text-xs text-gray-500">
+                        <div className="flex items-center justify-between text-xs text-slate-400">
                           <div className="flex items-center gap-4">
                             <span className="font-medium">
                               {new Date(notification.creada || notification.fecha).toLocaleString('es-ES', {
@@ -370,27 +375,27 @@ export default function NotificationPanel({ token, isOpen, onClose }) {
                               })}
                             </span>
                             <span className="flex items-center gap-1">
-                              <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${typeConfig.color.replace('text-', 'from-').replace('-600', '-400')} ${typeConfig.color.replace('text-', 'to-').replace('-600', '-500')}`} />
+                              <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${typeConfig.color.replace('text-', 'from-').replace('-400', '-500')} ${typeConfig.color.replace('text-', 'to-').replace('-400', '-600')}`} />
                               {typeConfig.title}
                             </span>
                           </div>
 
                           {notification.leida && (
-                            <Check className="w-4 h-4 text-green-500" />
+                            <Check className="w-4 h-4 text-green-400" />
                           )}
                         </div>
 
                         {/* URL si existe */}
                         {notification.url && (
-                          <div className="mt-3 pt-3 border-t border-gray-100">
+                          <div className="mt-3 pt-3 border-t border-white/10">
                             <a
                               href={notification.url}
                               onClick={(e) => e.stopPropagation()}
                               className="
                                 inline-flex items-center gap-1.5
                                 px-3 py-1.5 rounded-lg text-xs font-medium
-                                bg-blue-50 text-blue-700 border border-blue-200
-                                hover:bg-blue-100 hover:border-blue-300
+                                bg-blue-500/20 text-blue-300 border border-blue-500/30
+                                hover:bg-blue-500/30 hover:border-blue-500/50
                                 transition-all duration-200
                                 transform hover:scale-105 active:scale-95
                               "
@@ -410,19 +415,20 @@ export default function NotificationPanel({ token, isOpen, onClose }) {
 
           {/* Load More */}
           {notifications.length >= 20 && filteredNotifications.length > 0 && (
-            <div className="p-4 border-t border-gray-100/80">
+            <div className="p-4 border-t border-white/10">
               <button
                 onClick={handleLoadMore}
                 disabled={loading}
                 className="
                   w-full flex items-center justify-center gap-2
                   px-4 py-3 rounded-xl
-                  bg-white border-2 border-gray-200
-                  text-gray-700 font-semibold text-sm
-                  hover:bg-gray-50 hover:border-gray-300
+                  bg-slate-900/60 backdrop-blur-sm border border-white/10
+                  text-slate-200 font-semibold text-sm
+                  hover:bg-slate-800/80 hover:border-white/20
                   active:scale-95 disabled:opacity-50
                   transition-all duration-200
                   transform hover:scale-[1.01]
+                  shadow-lg
                 "
               >
                 {loading ? (

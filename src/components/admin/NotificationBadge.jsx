@@ -11,10 +11,10 @@ export default function NotificationBadge({ token, onClick, className = '' }) {
       onClick={onClick}
       className={`
         relative group p-3 rounded-2xl
-        bg-white/80 backdrop-blur-sm border border-white/20
-        hover:bg-white hover:border-white/40
+        bg-slate-900/60 backdrop-blur-xl border border-white/10
+        hover:bg-slate-800/80 hover:border-white/20
         active:scale-95
-        shadow-lg hover:shadow-xl
+        shadow-2xl hover:shadow-blue-500/20
         transition-all duration-300 ease-out
         transform hover:scale-105
         ${className}
@@ -24,9 +24,9 @@ export default function NotificationBadge({ token, onClick, className = '' }) {
       {/* Icono principal */}
       <div className="relative">
         {hasNotifications ? (
-          <BellRing className="w-6 h-6 text-blue-600 animate-pulse" />
+          <BellRing className="w-6 h-6 text-blue-400 animate-pulse" />
         ) : (
-          <Bell className="w-6 h-6 text-gray-600 group-hover:text-gray-800 transition-colors duration-200" />
+          <Bell className="w-6 h-6 text-slate-400 group-hover:text-slate-200 transition-colors duration-200" />
         )}
 
         {/* Indicador de conexión */}
@@ -40,11 +40,11 @@ export default function NotificationBadge({ token, onClick, className = '' }) {
       {hasNotifications && (
         <div className="
           absolute -top-1 -right-1
-          bg-gradient-to-r from-red-500 to-pink-500
+          bg-gradient-to-r from-blue-500 to-cyan-500
           text-white text-xs font-bold
           rounded-full min-w-[22px] h-[22px]
           flex items-center justify-center
-          shadow-lg border-2 border-white
+          shadow-lg shadow-blue-500/30 border border-white/20
           animate-in zoom-in-50 duration-300
           transform scale-100 hover:scale-110 transition-transform
         ">
@@ -55,7 +55,7 @@ export default function NotificationBadge({ token, onClick, className = '' }) {
           {/* Pulsación animada */}
           <div className="
             absolute inset-0 rounded-full
-            bg-gradient-to-r from-red-500 to-pink-500
+            bg-gradient-to-r from-blue-500 to-cyan-500
             animate-ping opacity-20
           " />
         </div>
@@ -64,30 +64,30 @@ export default function NotificationBadge({ token, onClick, className = '' }) {
       {/* Tooltip */}
       <div className="
         absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3
-        bg-gray-900 text-white text-sm px-3 py-2 rounded-xl
+        bg-slate-900/90 backdrop-blur-xl text-slate-200 text-sm px-3 py-2 rounded-xl
         opacity-0 group-hover:opacity-100 pointer-events-none
         transition-all duration-200 whitespace-nowrap
-        shadow-xl border border-gray-700/50
+        shadow-2xl border border-white/10
         before:content-[''] before:absolute before:top-full before:left-1/2
         before:transform before:-translate-x-1/2 before:border-8
-        before:border-transparent before:border-t-gray-900
+        before:border-transparent before:border-t-slate-900
         z-50
       ">
         {hasNotifications ? (
           <div className="flex items-center gap-2">
-            <BellRing className="w-4 h-4 text-red-400" />
+            <BellRing className="w-4 h-4 text-blue-400" />
             <span>{unreadCount} notificaciones pendientes</span>
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <Bell className="w-4 h-4 text-gray-400" />
+            <Bell className="w-4 h-4 text-slate-400" />
             <span>Sin notificaciones nuevas</span>
           </div>
         )}
 
         {/* Estado de conexión */}
-        <div className="flex items-center gap-2 mt-1 text-xs text-gray-300">
-          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-blue-400' : 'bg-gray-400'}`} />
+        <div className="flex items-center gap-2 mt-1 text-xs text-slate-400">
+          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-blue-400' : 'bg-slate-400'}`} />
           <span>{isConnected ? 'HTTP Polling' : 'Desconectado'}</span>
         </div>
       </div>
