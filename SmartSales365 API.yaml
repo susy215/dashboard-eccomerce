@@ -899,6 +899,47 @@ paths:
       responses:
         '200':
           description: No response body
+  /api/ia/historial/:
+    get:
+      operationId: api_ia_historial_retrieve
+      description: Retorna el historial de consultas realizadas por el usuario actual.
+      summary: Obtener historial de consultas
+      parameters:
+      - in: query
+        name: formato
+        schema:
+          type: string
+        description: Filtrar por formato (opcional)
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          default: 20
+        description: 'Número máximo de consultas a retornar (default: 20)'
+      tags:
+      - IA - Reportes Dinámicos
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Historial de consultas
+                examples:
+                - name: Historial
+                  value:
+                    count: 2
+                    results:
+                    - id: 1
+                      prompt: Quiero un reporte de ventas de octubre en PDF
+                      formato_salida: pdf
+                      fecha_consulta: '2024-11-04T20:00:00Z'
+                      tiempo_ejecucion: 0.45
+                      error: null
+          description: ''
   /api/notificaciones/historial/:
     get:
       operationId: api_notificaciones_historial_list
@@ -2697,12 +2738,16 @@ components:
       - compra_exitosa
       - cambio_estado
       - promocion
+      - nueva_compra
+      - nuevo_pago
       - otro
       type: string
       description: |-
         * `compra_exitosa` - Compra Exitosa
         * `cambio_estado` - Cambio de Estado
         * `promocion` - Promoción
+        * `nueva_compra` - Nueva Compra (Admin)
+        * `nuevo_pago` - Nuevo Pago (Admin)
         * `otro` - Otro
     PaginatedCategoriaList:
       type: object
