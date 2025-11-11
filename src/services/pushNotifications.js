@@ -25,8 +25,16 @@ function arrayBufferToBase64(buffer) {
   return window.btoa(binary)
 }
 
-// Obtener clave VAPID del backend
+// Obtener clave VAPID (primero del frontend, luego del backend)
 export async function getVapidPublicKey(token) {
+  // Intentar obtener de variables de entorno del frontend primero
+  const frontendKey = import.meta.env.VITE_VAPID_PUBLIC_KEY
+  if (frontendKey) {
+    console.log('✅ Usando VAPID key del frontend')
+    return frontendKey
+  }
+
+  // Si no está en frontend, obtener del backend
   try {
     const response = await axios.get(`${API_URL}/api/notificaciones/vapid-public-key/`, {
       headers: { 'Authorization': `Token ${token}` }
