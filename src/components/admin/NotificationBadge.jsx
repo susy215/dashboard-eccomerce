@@ -7,11 +7,11 @@ export default function NotificationBadge({ token, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="relative p-2 rounded-full hover:bg-gray-100"
+      className="relative p-3 rounded-xl bg-slate-900/60 backdrop-blur-xl border border-white/10 hover:bg-slate-800/80 hover:border-white/20 shadow-2xl hover:shadow-blue-500/20 transition-all duration-300"
     >
-      <Bell className="w-5 h-5" />
+      <Bell className="w-5 h-5 text-slate-300 hover:text-blue-400 transition-colors" />
       {unreadCount > 0 && (
-        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center">
+        <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full min-w-[20px] h-[20px] flex items-center justify-center shadow-lg border-2 border-slate-900">
           {unreadCount > 99 ? '99+' : unreadCount}
         </span>
       )}
