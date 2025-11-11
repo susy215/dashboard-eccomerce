@@ -15,21 +15,21 @@ export function useAdminNotifications(token) {
 
   const loadNotifications = useCallback(async () => {
     try {
-      const response = await adminNotificationsAPI.getNotifications()
+      const response = await adminNotificationsAPI.getNotifications(token)
       setNotifications(response.data.results || [])
     } catch (error) {
       console.error('Error cargando notificaciones:', error)
     }
-  }, [])
+  }, [token])
 
   const loadUnreadCount = useCallback(async () => {
     try {
-      const response = await adminNotificationsAPI.getUnreadCount()
+      const response = await adminNotificationsAPI.getUnreadCount(token)
       setUnreadCount(response.data.count || 0)
     } catch (error) {
       console.error('Error cargando conteo:', error)
     }
-  }, [])
+  }, [token])
 
   const markAsRead = useCallback(async (notificationId) => {
     try {
@@ -47,13 +47,13 @@ export function useAdminNotifications(token) {
 
   const markAllAsRead = useCallback(async () => {
     try {
-      await adminNotificationsAPI.markAllAsRead()
+      await adminNotificationsAPI.markAllAsRead(token)
       setNotifications(prev => prev.map(n => ({ ...n, leida: true })))
       setUnreadCount(0)
     } catch (error) {
       console.error('Error marcando todas como leídas:', error)
     }
-  }, [])
+  }, [token])
 
   // Fallback a HTTP polling
   const startHttpPolling = useCallback(() => {
@@ -61,12 +61,8 @@ export function useAdminNotifications(token) {
 
     const pollForNotifications = async () => {
       try {
-        // Usar el endpoint correcto según tu backend
-        const response = await axios.get(`${API_URL}/api/notificaciones/historial/?leida=false`, {
-          headers: {
-            'Authorization': `Token ${token}`
-          }
-        })
+        // Usar la función API que ya tiene el token configurado
+        const response = await adminNotificationsAPI.getUnreadCount(token)
 
         const newNotifications = response.data.results || []
 
@@ -100,10 +96,15 @@ export function useAdminNotifications(token) {
           }
         }
 
-        setUnreadCount(newNotifications.filter(n => !n.leida && (n.tipo === 'nueva_compra' || n.tipo === 'nuevo_pago')).length)
+        // Actualizar conteo total de no leídas
+        const totalUnread = newNotifications.filter(n => !n.leida && (n.tipo === 'nueva_compra' || n.tipo === 'nuevo_pago')).length
+        setUnreadCount(totalUnread)
 
       } catch (error) {
         console.error('Error en polling HTTP:', error)
+        if (error.response?.status === 401) {
+          console.error('❌ Error de autenticación - Token inválido')
+        }
       }
     }
 

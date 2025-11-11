@@ -5,7 +5,9 @@ import NotificationPanel from '../components/admin/NotificationPanel'
 
 export default function AdminLayout() {
   const [notificationsOpen, setNotificationsOpen] = useState(false)
-  const token = localStorage.getItem('auth_token')
+
+  // Obtener token (puede estar en 'token' o 'auth_token')
+  const token = localStorage.getItem('token') || localStorage.getItem('auth_token')
 
   return (
     <div className="min-h-screen bg-gray-50">
