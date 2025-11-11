@@ -4,7 +4,6 @@ import KpiCards from '../components/KpiCards';
 import SalesLine from '../components/SalesLine';
 import CategoryBar from '../components/CategoryBar';
 import TopList from '../components/TopList';
-import NotificationBadge from '../components/admin/NotificationBadge';
 
 export default function Dashboard() {
   const token = localStorage.getItem('token');
@@ -61,7 +60,7 @@ export default function Dashboard() {
               </h1>
               <p className="text-slate-400 text-sm mt-0.5">Dashboard Analítico en Tiempo Real</p>
             </div>
-            <div className="flex items-center gap-3 fade-in">
+            <div className="flex items-center gap-2 fade-in">
               <div className="inline-flex rounded-xl border border-white/10 bg-slate-900/60 backdrop-blur-sm p-1 shadow-lg">
                 {[7, 30, 90].map((d) => (
                   <button
@@ -84,13 +83,6 @@ export default function Dashboard() {
               >
                 {[5, 10, 15].map((l) => <option key={l} value={l}>Top {l}</option>)}
               </select>
-
-              {/* Notification Badge integrado en el header */}
-              <NotificationBadge
-                token={token}
-                onClick={() => window.dispatchEvent(new CustomEvent('openNotifications'))}
-                className="!relative !top-0 !right-0 !fixed"
-              />
             </div>
           </div>
         </div>
