@@ -12,6 +12,12 @@ export function useAdminNotifications(token) {
   const wsRef = useRef(null)
   const pollingIntervalRef = useRef(null)
   const lastNotificationIdRef = useRef(null)
+  const notificationsRef = useRef([]) // Referencia para acceder al estado actual en callbacks
+
+  // Mantener la referencia actualizada
+  useEffect(() => {
+    notificationsRef.current = notifications
+  }, [notifications])
 
   const loadNotifications = useCallback(async () => {
     try {
@@ -64,40 +70,49 @@ export function useAdminNotifications(token) {
         // Usar la función API que ya tiene el token configurado
         const response = await adminNotificationsAPI.getUnreadCount(token)
 
-        const newNotifications = response.data.results || []
+        const allNotifications = response.data.results || []
 
-        // Filtrar solo notificaciones nuevas
+        // Filtrar solo notificaciones de interés (compras y pagos)
+        const relevantNotifications = allNotifications.filter(n =>
+          n.tipo === 'nueva_compra' || n.tipo === 'nuevo_pago'
+        )
+
+        // Filtrar solo notificaciones nuevas (no vistas antes)
         const reallyNewNotifications = lastNotificationIdRef.current
-          ? newNotifications.filter(n => n.id > lastNotificationIdRef.current)
-          : newNotifications
+          ? relevantNotifications.filter(n => n.id > lastNotificationIdRef.current)
+          : relevantNotifications
 
-        if (reallyNewNotifications.length > 0) {
-          console.log('🔔 Nuevas notificaciones via HTTP:', reallyNewNotifications.length)
+        // Filtrar duplicados (por si el backend envía múltiples veces)
+        const uniqueNewNotifications = reallyNewNotifications.filter(newNotif =>
+          !notificationsRef.current.some(existingNotif => existingNotif.id === newNotif.id)
+        )
 
-          reallyNewNotifications.forEach(notification => {
-            // Solo agregar si es nueva_compra o nuevo_pago
-            if (notification.tipo === 'nueva_compra' || notification.tipo === 'nuevo_pago') {
-              setNotifications(prev => [notification, ...prev])
-              setUnreadCount(prev => prev + 1)
+        if (uniqueNewNotifications.length > 0) {
+          console.log('🔔 Nuevas notificaciones únicas via HTTP:', uniqueNewNotifications.length)
 
-              // Mostrar notificación del navegador
-              if ('Notification' in window && Notification.permission === 'granted') {
-                new Notification(notification.titulo, {
-                  body: notification.mensaje,
-                  icon: '/admin-icon.png',
-                  tag: `admin-${notification.id}`
-                })
-              }
+          // Agregar las nuevas notificaciones al estado
+          setNotifications(prev => [...uniqueNewNotifications, ...prev])
+
+          // Mostrar notificaciones del navegador para cada nueva
+          uniqueNewNotifications.forEach(notification => {
+            if ('Notification' in window && Notification.permission === 'granted') {
+              new Notification(notification.titulo, {
+                body: notification.mensaje,
+                icon: '/admin-icon.png',
+                tag: `admin-${notification.id}`
+              })
             }
           })
 
-          if (newNotifications.length > 0) {
-            lastNotificationIdRef.current = Math.max(...newNotifications.map(n => n.id))
+          // Actualizar el último ID visto (solo de las nuevas)
+          if (uniqueNewNotifications.length > 0) {
+            const maxNewId = Math.max(...uniqueNewNotifications.map(n => n.id))
+            lastNotificationIdRef.current = Math.max(lastNotificationIdRef.current || 0, maxNewId)
           }
         }
 
-        // Actualizar conteo total de no leídas
-        const totalUnread = newNotifications.filter(n => !n.leida && (n.tipo === 'nueva_compra' || n.tipo === 'nuevo_pago')).length
+        // Actualizar conteo total de no leídas (solo notificaciones relevantes no leídas)
+        const totalUnread = relevantNotifications.filter(n => !n.leida).length
         setUnreadCount(totalUnread)
 
       } catch (error) {
