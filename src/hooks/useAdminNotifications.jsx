@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { setupAdminWebSocket, disconnectAdminWebSocket, adminNotificationsAPI } from '../services/adminNotifications'
+import { setupAdminWebSocket, disconnectAdminWebSocket, disableWebSocket, adminNotificationsAPI } from '../services/adminNotifications'
 import axios from 'axios'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
@@ -154,12 +154,15 @@ export function useAdminNotifications(token) {
 
       // Si falla 3 veces seguidas, cambiar a polling HTTP
       if (connectionAttempts >= 3 && !wsFailed) {
-        console.warn('⚠️ WebSocket falló 3 veces, cambiando a polling HTTP')
+        console.warn('⚠️ WebSocket falló 3 veces, cambiando a polling HTTP permanentemente')
         wsFailed = true
         setConnectionMode('polling')
         setIsConnected(true) // HTTP polling está "conectado"
 
-        // Detener completamente WebSocket
+        // Deshabilitar WebSocket permanentemente para esta sesión
+        disableWebSocket()
+
+        // Cerrar la instancia actual
         if (wsInstance) {
           try {
             wsInstance.close(1000, 'Switching to HTTP polling')
