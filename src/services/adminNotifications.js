@@ -3,65 +3,15 @@ import axios from 'axios'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
-// Variable global para controlar si WebSocket debe reconectar
-let websocketDisabled = false
-
+// WebSocket está permanentemente deshabilitado - backend no lo soporta
 export function setupAdminWebSocket(onMessage, onError, token) {
-  if (!token) {
-    console.warn('No hay token para WebSocket admin')
-    return null
-  }
-
-  // Si WebSocket está deshabilitado, no crear conexión
-  if (websocketDisabled) {
-    console.log('🚫 WebSocket deshabilitado permanentemente')
-    return null
-  }
-
-  const wsUrl = `${API_URL.replace('http', 'ws')}/ws/admin/notifications/?token=${token}`
-
-  const ws = new ReconnectingWebSocket(wsUrl, [], {
-    maxReconnectionDelay: 5000,
-    minReconnectionDelay: 1000,
-    reconnectionDelayGrowFactor: 1.3,
-    maxRetries: 3, // Solo 3 intentos
-  })
-
-  let connectionAttempts = 0
-
-  ws.onopen = () => {
-    console.log('✅ WebSocket admin conectado')
-    connectionAttempts = 0
-  }
-
-  ws.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data)
-      console.log('📨 Notificación admin:', data)
-      onMessage(data)
-    } catch (e) {
-      console.error('Error parseando mensaje WS:', e)
-      onError(e)
-    }
-  }
-
-  ws.onerror = (error) => {
-    console.error('❌ Error WebSocket admin:', error)
-    connectionAttempts++
-    onError(error)
-  }
-
-  ws.onclose = (event) => {
-    console.log('🔌 WebSocket admin cerrado:', event.code, event.reason)
-  }
-
-  return ws
+  console.log('🚫 WebSocket admin no disponible en backend - usando HTTP polling')
+  return null
 }
 
-// Función para deshabilitar WebSocket permanentemente
+// Función para deshabilitar WebSocket (ya está deshabilitado)
 export function disableWebSocket() {
-  console.log('🚫 Deshabilitando WebSocket permanentemente')
-  websocketDisabled = true
+  console.log('🚫 WebSocket ya está deshabilitado permanentemente')
 }
 
 export function disconnectAdminWebSocket(ws) {

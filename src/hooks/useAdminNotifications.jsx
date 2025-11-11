@@ -125,86 +125,20 @@ export function useAdminNotifications(token) {
   useEffect(() => {
     if (!token) return
 
-    let connectionAttempts = 0
-    let wsFailed = false
-    let wsInstance = null
+    console.log('🔄 Iniciando sistema de notificaciones admin con HTTP polling')
 
-    const handleMessage = (data) => {
-      if (data.type === 'notification') {
-        // Solo procesar notificaciones de compras y pagos
-        if (data.tipo === 'nueva_compra' || data.tipo === 'nuevo_pago') {
-          setNotifications(prev => [data, ...prev])
-          setUnreadCount(prev => prev + 1)
-
-          // Mostrar notificación del navegador
-          if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification(data.titulo, {
-              body: data.mensaje,
-              icon: '/admin-icon.png',
-              tag: `admin-${data.id}`
-            })
-          }
-        }
-      }
-    }
-
-    const handleError = (error) => {
-      console.error('Error WS admin:', error)
-      connectionAttempts++
-
-      // Si falla 3 veces seguidas, cambiar a polling HTTP
-      if (connectionAttempts >= 3 && !wsFailed) {
-        console.warn('⚠️ WebSocket falló 3 veces, cambiando a polling HTTP permanentemente')
-        wsFailed = true
-        setConnectionMode('polling')
-        setIsConnected(true) // HTTP polling está "conectado"
-
-        // Deshabilitar WebSocket permanentemente para esta sesión
-        disableWebSocket()
-
-        // Cerrar la instancia actual
-        if (wsInstance) {
-          try {
-            wsInstance.close(1000, 'Switching to HTTP polling')
-          } catch (e) {
-            console.log('WebSocket ya cerrado')
-          }
-          wsInstance = null
-        }
-        wsRef.current = null
-
-        // Iniciar polling HTTP
-        startHttpPolling()
-      }
-    }
-
-    // Intentar WebSocket primero (solo si no ha fallado antes)
-    if (!wsFailed) {
-      console.log('🚀 Intentando conectar WebSocket...')
-      wsInstance = setupAdminWebSocket(handleMessage, handleError, token)
-      wsRef.current = wsInstance
-      setIsConnected(true)
-      setConnectionMode('websocket')
-    } else {
-      // Si ya sabemos que WebSocket falla, ir directo a polling
-      console.log('🔄 WebSocket falló anteriormente, usando polling HTTP')
-      setConnectionMode('polling')
-      setIsConnected(true)
-      startHttpPolling()
-    }
+    // Configurar modo polling desde el inicio
+    setConnectionMode('polling')
+    setIsConnected(true)
 
     // Cargar datos iniciales
     loadNotifications()
     loadUnreadCount()
 
+    // Iniciar polling HTTP inmediatamente
+    startHttpPolling()
+
     return () => {
-      if (wsInstance) {
-        try {
-          wsInstance.close(1000, 'Component unmounting')
-        } catch (e) {
-          // Ignorar errores al cerrar
-        }
-      }
       stopHttpPolling()
     }
   }, [token, loadNotifications, loadUnreadCount, startHttpPolling, stopHttpPolling])

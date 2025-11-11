@@ -26,7 +26,7 @@ export default function NotificationPanel({ isOpen, onClose, token }) {
           <div>
             <h2 className="font-semibold text-lg">Notificaciones</h2>
             <p className="text-xs text-gray-500">
-              {connectionMode === 'websocket' ? 'WebSocket' : 'HTTP Polling'} • {isConnected ? 'Conectado' : 'Desconectado'}
+              HTTP Polling • {isConnected ? 'Activo' : 'Inactivo'}
             </p>
           </div>
           <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100">
