@@ -8,7 +8,7 @@ const TYPE_ICONS = {
 }
 
 export default function NotificationPanel({ isOpen, onClose, token }) {
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useAdminNotifications(token)
+  const { notifications, unreadCount, isConnected, connectionMode, markAsRead, markAllAsRead } = useAdminNotifications(token)
   const [activeTab, setActiveTab] = useState('all')
 
   const filteredNotifications = activeTab === 'unread'
@@ -23,7 +23,12 @@ export default function NotificationPanel({ isOpen, onClose, token }) {
 
       <div className="relative ml-auto w-full max-w-md bg-white dark:bg-gray-800 shadow-xl flex flex-col">
         <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="font-semibold text-lg">Notificaciones</h2>
+          <div>
+            <h2 className="font-semibold text-lg">Notificaciones</h2>
+            <p className="text-xs text-gray-500">
+              {connectionMode === 'websocket' ? 'WebSocket' : 'HTTP Polling'} • {isConnected ? 'Conectado' : 'Desconectado'}
+            </p>
+          </div>
           <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100">
             <X className="w-5 h-5" />
           </button>

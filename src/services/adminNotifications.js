@@ -15,11 +15,14 @@ export function setupAdminWebSocket(onMessage, onError, token) {
     maxReconnectionDelay: 10000,
     minReconnectionDelay: 1000,
     reconnectionDelayGrowFactor: 1.3,
-    maxRetries: 10,
+    maxRetries: 5, // Reducir intentos para no saturar
   })
+
+  let connectionAttempts = 0
 
   ws.onopen = () => {
     console.log('✅ WebSocket admin conectado')
+    connectionAttempts = 0
   }
 
   ws.onmessage = (event) => {
@@ -35,11 +38,18 @@ export function setupAdminWebSocket(onMessage, onError, token) {
 
   ws.onerror = (error) => {
     console.error('❌ Error WebSocket admin:', error)
+    connectionAttempts++
     onError(error)
   }
 
   ws.onclose = (event) => {
-    console.log('🔌 WebSocket admin cerrado:', event.code)
+    console.log('🔌 WebSocket admin cerrado:', event.code, event.reason)
+
+    // Si se cerró por error del servidor y hemos intentado varias veces,
+    // probablemente el backend no tiene WebSocket implementado
+    if (event.code !== 1000 && connectionAttempts >= 3) {
+      console.warn('⚠️ WebSocket no disponible en el backend. Considera implementar Channels.')
+    }
   }
 
   return ws
