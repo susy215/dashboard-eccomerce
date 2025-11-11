@@ -33,11 +33,13 @@ export function useAdminNotifications(token) {
 
   const markAsRead = useCallback(async (notificationId) => {
     try {
-      await adminNotificationsAPI.markAsRead(notificationId)
+      // Nota: El backend no tiene endpoint para marcar individualmente,
+      // solo para marcar todas como leídas. Por ahora solo actualizamos localmente.
       setNotifications(prev =>
         prev.map(n => n.id === notificationId ? { ...n, leida: true } : n)
       )
       setUnreadCount(prev => Math.max(0, prev - 1))
+      console.log('Notificación marcada como leída localmente')
     } catch (error) {
       console.error('Error marcando como leída:', error)
     }
@@ -124,6 +126,7 @@ export function useAdminNotifications(token) {
 
     let connectionAttempts = 0
     let wsFailed = false
+    let wsInstance = null
 
     const handleMessage = (data) => {
       if (data.type === 'notification') {
@@ -153,31 +156,51 @@ export function useAdminNotifications(token) {
         console.warn('⚠️ WebSocket falló 3 veces, cambiando a polling HTTP')
         wsFailed = true
         setConnectionMode('polling')
-        setIsConnected(false)
+        setIsConnected(true) // HTTP polling está "conectado"
 
-        // Detener WebSocket
-        if (wsRef.current) {
-          disconnectAdminWebSocket(wsRef.current)
-          wsRef.current = null
+        // Detener completamente WebSocket
+        if (wsInstance) {
+          try {
+            wsInstance.close(1000, 'Switching to HTTP polling')
+          } catch (e) {
+            console.log('WebSocket ya cerrado')
+          }
+          wsInstance = null
         }
+        wsRef.current = null
 
         // Iniciar polling HTTP
         startHttpPolling()
       }
     }
 
-    // Intentar WebSocket primero
-    console.log('🚀 Intentando conectar WebSocket...')
-    wsRef.current = setupAdminWebSocket(handleMessage, handleError, token)
-    setIsConnected(true)
-    setConnectionMode('websocket')
+    // Intentar WebSocket primero (solo si no ha fallado antes)
+    if (!wsFailed) {
+      console.log('🚀 Intentando conectar WebSocket...')
+      wsInstance = setupAdminWebSocket(handleMessage, handleError, token)
+      wsRef.current = wsInstance
+      setIsConnected(true)
+      setConnectionMode('websocket')
+    } else {
+      // Si ya sabemos que WebSocket falla, ir directo a polling
+      console.log('🔄 WebSocket falló anteriormente, usando polling HTTP')
+      setConnectionMode('polling')
+      setIsConnected(true)
+      startHttpPolling()
+    }
 
     // Cargar datos iniciales
     loadNotifications()
     loadUnreadCount()
 
     return () => {
-      disconnectAdminWebSocket(wsRef.current)
+      if (wsInstance) {
+        try {
+          wsInstance.close(1000, 'Component unmounting')
+        } catch (e) {
+          // Ignorar errores al cerrar
+        }
+      }
       stopHttpPolling()
     }
   }, [token, loadNotifications, loadUnreadCount, startHttpPolling, stopHttpPolling])

@@ -61,10 +61,10 @@ export function disconnectAdminWebSocket(ws) {
   }
 }
 
-// API REST calls
+// API REST calls - según el YAML del backend
 export const adminNotificationsAPI = {
-  getNotifications: () => axios.get('/api/notificaciones/admin/'),
-  getUnreadCount: () => axios.get('/api/notificaciones/admin/no-leidas/'),
-  markAsRead: (id) => axios.post(`/api/notificaciones/admin/${id}/marcar-leida/`),
-  markAllAsRead: () => axios.post('/api/notificaciones/admin/marcar-todas-leidas/')
+  getNotifications: () => axios.get(`${API_URL}/api/notificaciones/historial/`),
+  getUnreadCount: () => axios.get(`${API_URL}/api/notificaciones/historial/?leida=false`),
+  markAsRead: (id) => axios.post(`${API_URL}/api/notificaciones/historial/marcar_todas_leidas/`),
+  markAllAsRead: () => axios.post(`${API_URL}/api/notificaciones/historial/marcar_todas_leidas/`)
 }
