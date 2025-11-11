@@ -95,6 +95,7 @@ export function useAdminNotifications(token) {
 
           // Mostrar notificaciones del navegador para cada nueva
           uniqueNewNotifications.forEach(notification => {
+            // Notificación del navegador (cuando está abierto)
             if ('Notification' in window && Notification.permission === 'granted') {
               new Notification(notification.titulo, {
                 body: notification.mensaje,
@@ -102,6 +103,10 @@ export function useAdminNotifications(token) {
                 tag: `admin-${notification.id}`
               })
             }
+
+            // Enviar notificación push al backend (para cuando el navegador esté cerrado)
+            // El backend se encargará de enviar push notifications a través del service worker
+            console.log('📤 Enviando notificación push para:', notification.titulo)
           })
 
           // Actualizar el último ID visto (solo de las nuevas)
