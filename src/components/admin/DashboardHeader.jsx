@@ -1,4 +1,4 @@
-import NotificationBadge from './NotificationBadge'
+import AdminNotifications from '../AdminNotifications'
 import LogoutButton from './LogoutButton'
 
 export default function DashboardHeader({ token, onNotificationsOpen, dias, setDias, limit, setLimit }) {
@@ -56,10 +56,7 @@ export default function DashboardHeader({ token, onNotificationsOpen, dias, setD
             {/* Botones de acción */}
             <div className="flex items-center gap-1 sm:gap-2">
               <LogoutButton />
-              <NotificationBadge
-                token={token}
-                onClick={onNotificationsOpen}
-              />
+              <AdminNotifications onOpenPanel={onNotificationsOpen} />
             </div>
           </div>
         </div>

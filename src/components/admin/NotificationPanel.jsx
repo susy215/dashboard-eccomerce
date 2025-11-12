@@ -44,11 +44,16 @@ export default function NotificationPanel({ isOpen, onClose, token }) {
   const {
     notifications,
     isConnected,
-    connectionMode,
-    loading
+    connectionStatus,
+    loading,
+    markAsRead
   } = useAdminNotifications(token)
 
   const handleNotificationClick = (notification) => {
+    // Marcar como leída si no lo está
+    if (!notification.leida) {
+      markAsRead(notification.id)
+    }
     // Navegar a la URL específica si existe
     if (notification.url) {
       window.location.href = notification.url
@@ -81,7 +86,7 @@ export default function NotificationPanel({ isOpen, onClose, token }) {
               <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                 <ConnectionIcon className={`w-3 h-3 ${isConnected ? 'text-green-500' : 'text-red-500'}`} />
                 <span>
-                  {connectionMode === 'polling' ? 'HTTP Polling' : 'WebSocket'} • {isConnected ? 'Conectado' : 'Desconectado'}
+                  WebSocket • {connectionStatus}
                 </span>
                 {loading && <div className="animate-spin rounded-full h-3 w-3 border border-slate-400 border-t-transparent" />}
               </div>

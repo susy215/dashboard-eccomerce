@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react'
 import Dashboard from '../pages/Dashboard'
-import NotificationBadge from '../components/admin/NotificationBadge'
 import NotificationPanel from '../components/admin/NotificationPanel'
 import NotificationSettings from '../components/admin/NotificationSettings'
-import LogoutButton from '../components/admin/LogoutButton'
 import { registerServiceWorker } from '../services/pushNotifications'
 
 export default function AdminLayout() {
@@ -39,7 +37,7 @@ export default function AdminLayout() {
 
   return (
     <div className="min-h-screen">
-      {/* Dashboard con header integrado que incluye los botones */}
+      {/* Dashboard con header integrado que incluye AdminNotifications */}
       <Dashboard />
 
       {/* Notification Settings */}
@@ -48,7 +46,7 @@ export default function AdminLayout() {
         onClose={() => {}} // No necesita onClose especial
       />
 
-      {/* Notification Panel */}
+      {/* Notification Panel Modal */}
       <NotificationPanel
         token={token}
         isOpen={notificationsOpen}

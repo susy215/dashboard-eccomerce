@@ -1,263 +1,180 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { adminNotificationsAPI } from '../services/adminNotifications'
-import axios from 'axios'
+import { useState, useEffect, useRef, useCallback } from 'react';
+import ReconnectingWebSocket from 'reconnecting-websocket';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const WS_URL = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws/admin/notifications/`;
 
-// Utilidad para formatear fechas correctamente
-function formatNotificationDate(dateString) {
-  console.log('Formateando fecha - Input:', dateString, typeof dateString)
+export const useAdminNotifications = () => {
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isConnected, setIsConnected] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState('Desconectado');
+  const ws = useRef(null);
 
-  if (!dateString) {
-    console.log('Fecha vacía o null')
-    return 'Fecha desconocida'
-  }
-
-  try {
-    // Manejar diferentes formatos de fecha
-    let date
-
-    // Si es una cadena, intentar diferentes formatos
-    if (typeof dateString === 'string') {
-      // Intentar formato ISO primero
-      if (dateString.includes('T') && dateString.includes('Z')) {
-        date = new Date(dateString)
-      } else if (dateString.includes('T')) {
-        // Formato ISO sin Z
-        date = new Date(dateString + (dateString.includes('+') ? '' : 'Z'))
-      } else {
-        // Otros formatos
-        date = new Date(dateString)
-      }
-    } else {
-      // Si no es string, intentar convertir directamente
-      date = new Date(dateString)
+  // Conectar WebSocket
+  const connect = useCallback(() => {
+    if (ws.current) {
+      ws.current.close();
     }
 
-    console.log('Fecha parseada:', date, 'isValid:', !isNaN(date.getTime()))
+    ws.current = new ReconnectingWebSocket(WS_URL, [], {
+      maxReconnectionDelay: 10000,
+      minReconnectionDelay: 1000,
+      reconnectionDelayGrowFactor: 1.3,
+      maxRetries: Infinity,
+      debug: false,
+    });
 
-    // Verificar si la fecha es válida
-    if (isNaN(date.getTime())) {
-      console.log('Fecha inválida, retornando "Fecha desconocida"')
-      return 'Fecha desconocida'
-    }
+    ws.current.onopen = () => {
+      console.log('✅ WebSocket conectado');
+      setIsConnected(true);
+      setConnectionStatus('Conectado');
+    };
 
-    // Formatear la fecha en español
-    const formatted = date.toLocaleString('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
+    ws.current.onclose = () => {
+      console.log('❌ WebSocket desconectado');
+      setIsConnected(false);
+      setConnectionStatus('Desconectado');
+    };
 
-    console.log('Fecha formateada:', formatted)
-    return formatted
-  } catch (error) {
-    console.warn('Error formateando fecha:', error, dateString)
-    return 'Fecha desconocida'
-  }
-}
+    ws.current.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      setConnectionStatus('Error de conexión');
+    };
 
-export function useAdminNotifications(token) {
-  const [notifications, setNotifications] = useState([])
-  const [isConnected, setIsConnected] = useState(false)
-  const [connectionMode, setConnectionMode] = useState('polling')
-  const [loading, setLoading] = useState(false)
-
-  const pollingIntervalRef = useRef(null)
-  const processedIdsRef = useRef(new Set()) // Para evitar duplicados
-  const lastPollTimeRef = useRef(0)
-  const isInitializedRef = useRef(false)
-
-  // Cargar notificaciones iniciales (solo recientes para mejor performance)
-  const loadNotifications = useCallback(async () => {
-    if (!token) return
-
-    setLoading(true)
-    try {
-      // Cargar solo las últimas 20 notificaciones para mejor performance inicial
-      const response = await adminNotificationsAPI.getNotifications(token)
-      const notificationsData = (response.data.results || []).slice(0, 20)
-
-      // Limpiar IDs procesados para evitar conflictos
-      processedIdsRef.current.clear()
-
-      // Procesar fechas y asegurar campos requeridos
-      const processedNotifications = notificationsData
-        .map(notification => {
-          const fechaFormateada = formatNotificationDate(notification.creada);
-          console.log('Procesando notificación:', {
-            id: notification.id,
-            creada: notification.creada,
-            fechaFormateada: fechaFormateada
-          });
-
-          return {
-            ...notification,
-            fechaFormateada: fechaFormateada,
-            titulo: notification.titulo || 'Nueva Notificación',
-            mensaje: notification.mensaje || 'Sin mensaje',
-            tipo: notification.tipo || 'sistema'
-            // Eliminado: leida - ya no existe en el backend
-          };
-        })
-        .filter(notification => {
-          // Evitar duplicados basados en ID
-          if (processedIdsRef.current.has(notification.id)) {
-            return false
-          }
-          processedIdsRef.current.add(notification.id)
-          return true
-        })
-
-      setNotifications(processedNotifications)
-
-      console.log('📋 Notificaciones iniciales cargadas:', processedNotifications.length)
-    } catch (error) {
-      console.error('❌ Error cargando notificaciones:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [token])
-
-  // Las notificaciones ya no tienen estado leído/no leído
-  // Se eliminaron las funciones markAsRead y markAllAsRead
-
-  // Polling simplificado - solo busca nuevas notificaciones
-  const startHttpPolling = useCallback(() => {
-    console.log('🔄 Iniciando polling HTTP simplificado...')
-
-    const pollForNotifications = async () => {
+    ws.current.onmessage = (event) => {
       try {
-        const now = Date.now()
-
-        // Evitar polling demasiado frecuente (30 segundos mínimo)
-        if (now - lastPollTimeRef.current < 30000) {
-          return
-        }
-
-        lastPollTimeRef.current = now
-
-        // Obtener todas las notificaciones recientes (sin filtrar por leídas)
-        const response = await adminNotificationsAPI.getNotifications(token)
-        const allNotifications = response.data.results || []
-
-        console.log('Datos del backend - Cantidad:', allNotifications.length)
-        if (allNotifications.length > 0) {
-          console.log('Primera notificación del backend:', allNotifications[0])
-          console.log('Campo "creada" de primera notificación:', allNotifications[0].creada)
-        }
-
-        // Filtrar solo las más recientes (últimas 50)
-        const recentNotifications = allNotifications
-          .slice(0, 50)
-          .sort((a, b) => b.id - a.id)
-
-        // Determinar cuáles son realmente nuevas
-        const newNotifications = recentNotifications.filter(n =>
-          !processedIdsRef.current.has(n.id)
-        )
-
-        if (newNotifications.length > 0) {
-          console.log('🔔 Nuevas notificaciones detectadas:', newNotifications.length)
-
-          // Procesar nuevas notificaciones
-          const processedNewNotifications = newNotifications.map(notification => ({
-            ...notification,
-            fechaFormateada: formatNotificationDate(notification.creada),
-            titulo: notification.titulo || 'Nueva Notificación',
-            mensaje: notification.mensaje || 'Sin mensaje',
-            tipo: notification.tipo || 'sistema'
-          }))
-
-          // Agregar al estado (al principio para que aparezcan arriba)
-          setNotifications(prev => [...processedNewNotifications, ...prev])
-
-          // Registrar IDs procesados
-          processedNewNotifications.forEach(n => processedIdsRef.current.add(n.id))
-
-          // Mostrar notificación del navegador (máximo 3 para no spamear)
-          if ('Notification' in window && Notification.permission === 'granted') {
-            processedNewNotifications.slice(0, 3).forEach(notification => {
-              try {
-                new Notification(notification.titulo, {
-                  body: notification.mensaje,
-                  icon: '/admin-icon.png',
-                  tag: `admin-${notification.id}`,
-                  requireInteraction: false,
-                  silent: false
-                })
-              } catch (error) {
-                console.warn('Error mostrando notificación del navegador:', error)
-              }
-            })
-          }
-        }
-
+        const data = JSON.parse(event.data);
+        handleMessage(data);
       } catch (error) {
-        console.error('❌ Error en polling HTTP:', error)
-        if (error.response?.status === 401) {
-          console.error('🔐 Error de autenticación - Token inválido')
-          setIsConnected(false)
-        }
+        console.error('Error parsing WebSocket message:', error);
       }
+    };
+  }, []);
+
+  // Manejar mensajes del WebSocket
+  const handleMessage = useCallback((data) => {
+    switch (data.type) {
+      case 'connection_established':
+        console.log('Conexión establecida:', data.message);
+        setConnectionStatus('Conectado');
+        break;
+
+      case 'notification':
+        // Nueva notificación recibida
+        const newNotification = {
+          id: data.id,
+          tipo: data.tipo,
+          titulo: data.titulo,
+          mensaje: data.mensaje,
+          url: data.url,
+          datos: data.datos,
+          creada: data.creada,
+          leida: false, // Las nuevas notificaciones no están leídas
+        };
+
+        setNotifications(prev => [newNotification, ...prev]);
+        setUnreadCount(prev => prev + 1);
+
+        // Mostrar notificación del navegador si es soportado
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification(data.titulo, {
+            body: data.mensaje,
+            icon: '/icon-192x192.png',
+            badge: '/badge-72x72.png',
+            data: data.datos,
+          });
+        }
+        break;
+
+      case 'unread_count':
+        setUnreadCount(data.count);
+        break;
+
+      case 'pong':
+        // Respuesta a ping - conexión viva
+        break;
+
+      case 'error':
+        console.error('WebSocket error:', data.message);
+        break;
+
+      default:
+        console.log('Mensaje WebSocket desconocido:', data);
     }
+  }, []);
 
-    // Polling cada 45 segundos
-    pollingIntervalRef.current = setInterval(pollForNotifications, 45000)
-
-    // Primera verificación inmediata después de un pequeño delay
-    setTimeout(pollForNotifications, 2000)
-  }, [token])
-
-  const stopHttpPolling = useCallback(() => {
-    if (pollingIntervalRef.current) {
-      clearInterval(pollingIntervalRef.current)
-      pollingIntervalRef.current = null
+  // Enviar ping para mantener conexión viva
+  const sendPing = useCallback(() => {
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      ws.current.send(JSON.stringify({ type: 'ping' }));
     }
-  }, [])
+  }, []);
 
-  // Limpiar notificaciones procesadas cuando cambie el token
+  // Marcar notificación como leída
+  const markAsRead = useCallback((notificationId) => {
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      ws.current.send(JSON.stringify({
+        type: 'mark_read',
+        notification_id: notificationId,
+      }));
+
+      // Actualizar estado local
+      setNotifications(prev =>
+        prev.map(notif =>
+          notif.id === notificationId
+            ? { ...notif, leida: true }
+            : notif
+        )
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    }
+  }, []);
+
+  // Obtener conteo de no leídas
+  const getUnreadCount = useCallback(() => {
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      ws.current.send(JSON.stringify({ type: 'get_unread_count' }));
+    }
+  }, []);
+
+  // Limpiar conexión
+  const disconnect = useCallback(() => {
+    if (ws.current) {
+      ws.current.close();
+      ws.current = null;
+    }
+    setIsConnected(false);
+    setConnectionStatus('Desconectado');
+  }, []);
+
+  // Efectos
   useEffect(() => {
-    processedIdsRef.current.clear()
-    isInitializedRef.current = false
-  }, [token])
+    connect();
 
-  // Inicialización del sistema
-  useEffect(() => {
-    if (!token) {
-      setIsConnected(false)
-      stopHttpPolling()
-      return
-    }
-
-    if (!isInitializedRef.current) {
-      console.log('🚀 Inicializando sistema de notificaciones admin')
-
-      setConnectionMode('polling')
-      setIsConnected(true)
-
-      // Cargar datos iniciales
-      loadNotifications()
-
-      // Iniciar polling
-      startHttpPolling()
-
-      isInitializedRef.current = true
-    }
+    // Ping cada 30 segundos para mantener conexión viva
+    const pingInterval = setInterval(sendPing, 30000);
 
     return () => {
-      stopHttpPolling()
+      clearInterval(pingInterval);
+      disconnect();
+    };
+  }, [connect, sendPing, disconnect]);
+
+  // Solicitar permisos de notificación al montar
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
     }
-  }, [token, loadNotifications, startHttpPolling, stopHttpPolling])
+  }, []);
 
   return {
     notifications,
+    unreadCount,
     isConnected,
-    connectionMode,
-    loading,
-    loadNotifications,
-    formatNotificationDate
-  }
-}
+    connectionStatus,
+    markAsRead,
+    getUnreadCount,
+    sendPing,
+    reconnect: connect,
+  };
+};
