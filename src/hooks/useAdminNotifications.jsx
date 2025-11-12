@@ -20,8 +20,9 @@ export const useAdminNotifications = () => {
   // Obtener headers de autenticación
   const getAuthHeaders = useCallback(() => {
     const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
+    console.log('Token being sent:', token); // Debug
     return {
-      'Authorization': `Bearer ${token}`,
+      'Authorization': `Token ${token}`,
       'Content-Type': 'application/json',
     };
   }, []);
@@ -42,7 +43,7 @@ export const useAdminNotifications = () => {
 
       console.log('🔍 Verificando notificaciones con token:', token.substring(0, 20) + '...');
 
-      const response = await fetch('https://smartsales365.duckdns.org/api/notificaciones/admin/', {
+      const response = await fetch('https://smartsales365.duckdns.org/api/notificaciones/admin/polling/', {
         method: 'GET',
         headers: getAuthHeaders(),
         credentials: 'include'
@@ -183,6 +184,18 @@ export const useAdminNotifications = () => {
     console.log('📨 No leídas:', unreadCount);
     console.log('⏰ Última verificación:', lastChecked ? lastChecked.toLocaleTimeString() : 'Nunca');
     console.log('❌ Error:', error || 'Ninguno');
+
+    // Verificar expiración del token
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const exp = new Date(payload.exp * 1000);
+        console.log('📅 Token expira:', exp);
+        console.log('⏰ Token expirado:', exp < new Date());
+      } catch (e) {
+        console.log('❌ Formato de token inválido');
+      }
+    }
 
     return {
       hasToken: !!token,
