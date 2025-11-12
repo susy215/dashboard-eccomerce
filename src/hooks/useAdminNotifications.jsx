@@ -1,10 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 
-// URL del WebSocket (autenticación por cookies de sesión)
+// URL del WebSocket (autenticación por token JWT)
 const getWebSocketUrl = () => {
-  // El backend usa cookies para autenticación, no tokens JWT en URL
-  return 'wss://smartsales365.duckdns.org/ws/admin/notifications';
+  const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
+  if (!token) {
+    console.warn('⚠️ No hay token JWT para WebSocket');
+    return null;
+  }
+  return `wss://smartsales365.duckdns.org/ws/admin/notifications?token=${token}`;
 };
 
 export const useAdminNotifications = () => {
@@ -164,54 +168,20 @@ export const useAdminNotifications = () => {
     };
   }, [isConnected, sendPing]);
 
-  // Conectar WebSocket solo si hay autenticación válida
+  // Conectar WebSocket cuando haya token JWT disponible
   useEffect(() => {
-    const initWebSocket = async () => {
-      const token = localStorage.getItem('token') || localStorage.getItem('auth_token')
+    const token = localStorage.getItem('token') || localStorage.getItem('auth_token')
 
-      console.log('🔍 Verificando autenticación para WebSocket...')
-      console.log('- Token JWT:', token ? '✅ Presente' : '❌ No encontrado')
-      console.log('- Cookies:', document.cookie)
-
-      if (!token) {
-        console.log('⚠️ No hay token JWT - WebSocket no se conectará')
-        return
-      }
-
-      // Verificar que el usuario esté autenticado haciendo una petición de prueba
-      try {
-        console.log('📡 Verificando autenticación con API...')
-        const authCheck = await fetch('https://smartsales365.duckdns.org/api/usuarios/me/', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Token ${token}`,
-            'Accept': 'application/json'
-          },
-          credentials: 'include'
-        })
-
-        console.log('📡 Respuesta verificación:', authCheck.status, authCheck.statusText)
-
-        if (!authCheck.ok) {
-          console.log('⚠️ Usuario no autenticado - WebSocket no se conectará')
-          return
-        }
-
-        const userData = await authCheck.json()
-        console.log('✅ Usuario autenticado:', userData.username)
-        console.log('🚀 Conectando WebSocket...')
-
-        connect()
-      } catch (err) {
-        console.warn('❌ Error verificando autenticación:', err)
-      }
+    if (!token) {
+      console.log('⚠️ No hay token JWT - WebSocket no se conectará')
+      return
     }
 
-    // Pequeño delay para asegurar que el login termine
-    const timer = setTimeout(initWebSocket, 2000)
+    console.log('🚀 Token JWT encontrado - conectando WebSocket...')
+    connect()
 
     return () => {
-      clearTimeout(timer)
+      // Cleanup se maneja en el effect de cleanup separado
     };
   }, [connect]);
 
@@ -233,13 +203,10 @@ export const useAdminNotifications = () => {
   const debugWebSocket = useCallback(async () => {
     const wsUrl = getWebSocketUrl();
     const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
-    const hasSessionCookie = document.cookie.includes('sessionid') || document.cookie.includes('csrftoken');
 
     console.log('🔍 === DIAGNÓSTICO COMPLETO WEBSOCKET ===');
     console.log('📡 URL WebSocket:', wsUrl);
     console.log('🔑 Token JWT:', token ? `${token.substring(0, 20)}...` : '❌ No encontrado');
-    console.log('🍪 Cookies de sesión:', hasSessionCookie ? '✅ Encontradas' : '❌ No encontradas');
-    console.log('📋 Todas las cookies:', document.cookie || 'Ninguna');
     console.log('🔌 Estado conexión:', isConnected ? '✅ Conectado' : '❌ Desconectado');
     console.log('📊 Estado detallado:', connectionStatus);
     console.log('🔔 Notificaciones:', notifications.length);
@@ -264,17 +231,21 @@ export const useAdminNotifications = () => {
     }
 
     // Probar WebSocket manual
-    try {
-      console.log('🔌 Probando WebSocket manual...');
-      const testWs = new WebSocket(wsUrl);
-      testWs.onopen = () => {
-        console.log('✅ WebSocket manual: CONECTADO');
-        testWs.close();
-      };
-      testWs.onerror = (err) => console.error('❌ WebSocket manual: ERROR', err);
-      testWs.onclose = (ev) => console.log('🔌 WebSocket manual: CERRADO', ev.code, ev.reason);
-    } catch (wsErr) {
-      console.error('❌ Error creando WebSocket:', wsErr);
+    if (wsUrl) {
+      try {
+        console.log('🔌 Probando WebSocket manual...');
+        const testWs = new WebSocket(wsUrl);
+        testWs.onopen = () => {
+          console.log('✅ WebSocket manual: CONECTADO');
+          testWs.close();
+        };
+        testWs.onerror = (err) => console.error('❌ WebSocket manual: ERROR', err);
+        testWs.onclose = (ev) => console.log('🔌 WebSocket manual: CERRADO', ev.code, ev.reason);
+      } catch (wsErr) {
+        console.error('❌ Error creando WebSocket:', wsErr);
+      }
+    } else {
+      console.log('❌ No se puede probar WebSocket: URL es null (no hay token)');
     }
 
     console.log('🏁 === FIN DIAGNÓSTICO ===');
@@ -282,12 +253,10 @@ export const useAdminNotifications = () => {
     return {
       wsUrl,
       hasToken: !!token,
-      hasSessionCookie,
       isConnected,
       connectionStatus,
       notificationCount: notifications.length,
-      unreadCount,
-      allCookies: document.cookie
+      unreadCount
     };
   }, [isConnected, connectionStatus, notifications.length, unreadCount]);
 
