@@ -11,7 +11,14 @@ export async function login({ username, password }) {
 
   // Primero obtener página de login para conseguir CSRF token
   try {
-    await apiFetch('/admin/login/', { method: 'GET' })
+    // Usar fetch directo para evitar el prefijo /api/
+    const response = await fetch('https://smartsales365.duckdns.org/admin/login/', {
+      method: 'GET',
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
+    }
   } catch (err) {
     console.warn('No se pudo obtener página de login:', err)
   }
@@ -28,14 +35,21 @@ export async function login({ username, password }) {
   form.append('csrfmiddlewaretoken', csrfToken)
   form.append('next', '/admin/')
 
-  const data = await apiFetch('/admin/login/', {
+  const response = await fetch('https://smartsales365.duckdns.org/admin/login/', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
       'X-CSRFToken': csrfToken,
     },
     body: form,
+    credentials: 'include'
   })
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`)
+  }
+
+  const data = await response.text()
 
   // En Django, un login exitoso generalmente redirige
   // Si no hay error, asumimos que fue exitoso
@@ -49,8 +63,14 @@ export async function login({ username, password }) {
 // Verificar si el usuario está autenticado (usando cookies de sesión)
 export async function checkAuth() {
   try {
-    const response = await apiFetch('/admin/', { method: 'GET' })
-    return { authenticated: true, username: localStorage.getItem('username') }
+    const response = await fetch('https://smartsales365.duckdns.org/admin/', {
+      method: 'GET',
+      credentials: 'include'
+    })
+    if (response.ok) {
+      return { authenticated: true, username: localStorage.getItem('username') }
+    }
+    return { authenticated: false }
   } catch (err) {
     // Si falla, no está autenticado
     return { authenticated: false }
@@ -81,7 +101,10 @@ function getCsrfToken() {
 export async function logout() {
   try {
     // Logout via API (limpia sesión)
-    await apiFetch('/admin/logout/')
+    await fetch('https://smartsales365.duckdns.org/admin/logout/', {
+      method: 'POST',
+      credentials: 'include'
+    })
   } catch (err) {
     console.warn('Error en logout API:', err)
   }
