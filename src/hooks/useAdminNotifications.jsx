@@ -101,7 +101,7 @@ export const useAdminNotifications = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [notifications, getAuthHeaders]);
+  }, [notifications]); // Removido getAuthHeaders - el token se obtiene dentro de la función
 
   // Función para reproducir sonido
   const playNotificationSound = useCallback(() => {
