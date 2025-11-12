@@ -48,7 +48,6 @@ export default function AdminLayout() {
 
       {/* Notification Panel Modal */}
       <NotificationPanel
-        token={token}
         isOpen={notificationsOpen}
         onClose={() => setNotificationsOpen(false)}
       />
