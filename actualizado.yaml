@@ -1,0 +1,3790 @@
+openapi: 3.0.3
+info:
+  title: SmartSales365 API
+  version: 1.0.0
+  description: API para SmartSales365
+paths:
+  /admin/api/schema/:
+    get:
+      operationId: admin_api_schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/clientes/:
+    get:
+      operationId: api_clientes_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedClienteList'
+          description: ''
+    post:
+      operationId: api_clientes_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Cliente'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Cliente'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Cliente'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cliente'
+          description: ''
+  /api/clientes/{id}/:
+    get:
+      operationId: api_clientes_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Cliente.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cliente'
+          description: ''
+    put:
+      operationId: api_clientes_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Cliente.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Cliente'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Cliente'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Cliente'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cliente'
+          description: ''
+    patch:
+      operationId: api_clientes_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Cliente.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCliente'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCliente'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCliente'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cliente'
+          description: ''
+    delete:
+      operationId: api_clientes_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Cliente.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/compra/compras/:
+    get:
+      operationId: api_compra_compras_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCompraList'
+          description: ''
+    post:
+      operationId: api_compra_compras_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Compra'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Compra'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Compra'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Compra'
+          description: ''
+  /api/compra/compras/{id}/:
+    get:
+      operationId: api_compra_compras_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Compra.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Compra'
+          description: ''
+    put:
+      operationId: api_compra_compras_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Compra.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Compra'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Compra'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Compra'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Compra'
+          description: ''
+    patch:
+      operationId: api_compra_compras_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Compra.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCompra'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCompra'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCompra'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Compra'
+          description: ''
+    delete:
+      operationId: api_compra_compras_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Compra.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/compra/compras/{id}/pay/:
+    post:
+      operationId: api_compra_compras_pay_create
+      description: |-
+        Marca la compra como pagada.
+        Body esperado: { "referencia": "..." }
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Compra.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Compra'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Compra'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Compra'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Compra'
+          description: ''
+  /api/compra/compras/{id}/receipt/:
+    get:
+      operationId: api_compra_compras_receipt_retrieve
+      description: Genera un comprobante PDF de la compra
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/compra/compras/{id}/stripe_session/:
+    post:
+      operationId: api_compra_compras_stripe_session_create
+      description: |-
+        Crea una Stripe Checkout Session para esta compra.
+        Body opcional: { "success_url": "...", "cancel_url": "..." }
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Compra.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Compra'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Compra'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Compra'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Compra'
+          description: ''
+  /api/compra/compras/checkout/:
+    post:
+      operationId: api_compra_compras_checkout_create
+      description: |-
+        Crea una compra con items dados (el carrito vive en el frontend).
+        Body esperado: {
+            "items": [{"producto": ID, "cantidad": N}, ...],
+            "observaciones": "...",
+            "codigo_promocion": "VERANO2025" (opcional)
+        }
+
+        ✅ Valida stock disponible
+        ✅ Reduce stock automáticamente
+        ✅ Aplica promoción si existe
+        ✅ Usa transacciones para atomicidad
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Compra'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Compra'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Compra'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Compra'
+          description: ''
+  /api/compra/stripe/public-key/:
+    get:
+      operationId: api_compra_stripe_public_key_retrieve
+      description: Retorna la clave pública de Stripe
+      tags:
+      - api
+      responses:
+        '200':
+          description: No response body
+  /api/compra/stripe/webhook/:
+    post:
+      operationId: api_compra_stripe_webhook_create
+      description: |-
+        Procesa webhook de Stripe.
+
+        Eventos soportados:
+        - checkout.session.completed: Marca la compra como pagada
+      tags:
+      - api
+      responses:
+        '200':
+          description: No response body
+  /api/ia/consulta/:
+    post:
+      operationId: api_ia_consulta_create
+      description: "\n\t\tProcesa un prompt en lenguaje natural y genera un reporte\
+        \ dinámico.\n\t\t\n\t\tEjemplos de prompts válidos:\n\t\t- \"Quiero un reporte\
+        \ de ventas del mes de septiembre, agrupado por producto, en PDF\"\n\t\t-\
+        \ \"Quiero un reporte en Excel que muestre las ventas del periodo del 01/10/2024\
+        \ al 01/01/2025\"\n\t\t- \"Ventas del último mes agrupadas por cliente\"\n\
+        \t\t\n\t\tEl sistema detecta automáticamente:\n\t\t- Tipo de reporte (ventas,\
+        \ productos, clientes, inventario)\n\t\t- Rangos de fechas (meses, fechas\
+        \ específicas, períodos relativos)\n\t\t- Formato de salida (PDF, Excel, CSV,\
+        \ pantalla)\n\t\t- Agrupaciones (por producto, cliente, categoría, fecha)\n\
+        \t\t- Filtros y métricas\n\t\t"
+      summary: Generar reporte dinámico desde prompt
+      tags:
+      - IA - Reportes Dinámicos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prompt:
+                  type: string
+                  description: Consulta en lenguaje natural
+                  examples:
+                  - Quiero un reporte de ventas del mes de septiembre en PDF
+                  - Ventas del 01/10/2024 al 01/01/2025 agrupadas por cliente en Excel
+                  - Top 10 productos más vendidos
+                formato:
+                  type: string
+                  enum:
+                  - pdf
+                  - excel
+                  - csv
+                  - pantalla
+                  description: Formato de salida (opcional, se puede inferir del prompt)
+              required:
+              - prompt
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Reporte generado exitosamente
+                content:
+                  application/json:
+                    examples:
+                    - name: Reporte en pantalla
+                      value:
+                        consulta_id: 1
+                        interpretacion:
+                          tipo_reporte: ventas
+                          fecha_inicio: '2024-09-01T00:00:00Z'
+                          fecha_fin: '2024-09-30T23:59:59Z'
+                          formato: pantalla
+                          agrupar_por:
+                          - producto
+                        resultado:
+                          tipo: por_producto
+                          columnas:
+                          - producto
+                          - sku
+                          - cantidad_vendida
+                          - total_vendido
+                          datos:
+                          - producto: Producto A
+                            sku: SKU001
+                            cantidad_vendida: 50
+                            total_vendido: 5000.0
+                        tiempo_ejecucion: 0.45
+                  application/pdf: {}
+                  application/vnd.openxmlformats-officedocument.spreadsheetml.sheet: {}
+                  text/csv: {}
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Prompt inválido o faltante
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                description: Error al procesar la consulta
+          description: ''
+  /api/ia/dashboard/:
+    get:
+      operationId: api_ia_dashboard_retrieve
+      description: "\n\t\tRetorna datos históricos y predicciones de ventas para visualización\
+        \ en dashboard.\n\t\t\n\t\tIncluye:\n\t\t- Ventas históricas diarias (completas\
+        \ con días sin ventas = 0)\n\t\t- Predicciones usando RandomForestRegressor\
+        \ (o media móvil como fallback)\n\t\t- KPIs (totales, promedios)\n\t\t- Top\
+        \ 5 categorías y clientes\n\t\t\n\t\tEl modelo se entrena automáticamente\
+        \ si no existe o si se solicita explícitamente.\n\t\t"
+      summary: Obtener datos del dashboard de predicciones
+      parameters:
+      - in: query
+        name: categoria
+        schema:
+          type: string
+        description: Filtrar por categoría (opcional)
+      - in: query
+        name: dias_hist
+        schema:
+          type: integer
+          default: 30
+        description: 'Días históricos a mostrar (default: 30)'
+      - in: query
+        name: dias_pred
+        schema:
+          type: integer
+          default: 7
+        description: 'Días futuros a predecir (default: 7)'
+      - in: query
+        name: entrenar
+        schema:
+          type: boolean
+          default: false
+        description: 'Si es true, reentrena el modelo antes de predecir (default:
+          false)'
+      tags:
+      - IA - Dashboard
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Datos del dashboard
+                examples:
+                - name: Dashboard completo
+                  value:
+                    historico:
+                    - fecha: '2024-12-01'
+                      total: 1500.0
+                      cantidad: 5
+                      tipo: historico
+                    predicciones:
+                    - fecha: '2024-12-08'
+                      total_predicho: 1600.0
+                      tipo: prediccion
+                    modelo_info:
+                      modelo: RandomForestRegressor
+                      metricas:
+                        test_r2: 0.85
+                        test_mae: 120.5
+                        test_rmse: 180.3
+                      fecha_entrenamiento: '2024-12-07T10:30:00Z'
+                    kpis:
+                      historico:
+                        total: 45000.0
+                        promedio_diario: 1500.0
+                        dias: 30
+                      prediccion:
+                        total: 11200.0
+                        promedio_diario: 1600.0
+                        dias: 7
+                    ventas_por_categoria:
+                    - categoria: Electrónica
+                      total: 25000.0
+                      cantidad: 100
+                    ventas_por_cliente:
+                    - cliente: Cliente A
+                      total: 5000.0
+                      cantidad: 10
+          description: ''
+  /api/ia/entrenar-modelo/:
+    post:
+      operationId: api_ia_entrenar_modelo_create
+      description: "\n\t\tEntrena o reentrena el modelo RandomForestRegressor para\
+        \ predicción de ventas.\n\t\t\n\t\tCaracterísticas del modelo:\n\t\t- Usa\
+        \ RandomForestRegressor de scikit-learn\n\t\t- Features: día de semana, día\
+        \ del mes, mes, día del año, media móvil, desviación estándar, cantidad, promedio\n\
+        \t\t- Se serializa con joblib para reutilización\n\t\t- Retorna métricas de\
+        \ evaluación (R², MAE, RMSE)\n\t\t\n\t\tSolo administradores pueden entrenar\
+        \ modelos.\n\t\t"
+      summary: Entrenar modelo de predicción
+      tags:
+      - IA - Modelo ML
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dias_historico:
+                  type: integer
+                  description: 'Días históricos a usar para entrenamiento (default:
+                    90)'
+                  default: 90
+                  minimum: 7
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Modelo entrenado exitosamente
+                examples:
+                - name: Entrenamiento exitoso
+                  value:
+                    success: true
+                    message: Modelo entrenado exitosamente
+                    metricas:
+                      train_samples: 70
+                      test_samples: 18
+                      train_r2: 0.92
+                      test_r2: 0.85
+                      test_mae: 120.5
+                      test_rmse: 180.3
+                      feature_importance:
+                        media_movil_7: 0.35
+                        dia_semana: 0.15
+                        cantidad: 0.2
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Error al entrenar (datos insuficientes u otro error)
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                description: Solo administradores pueden entrenar modelos
+          description: ''
+  /api/ia/health/:
+    get:
+      operationId: api_ia_health_retrieve
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/ia/historial/:
+    get:
+      operationId: api_ia_historial_retrieve
+      description: Retorna el historial de consultas realizadas por el usuario actual.
+      summary: Obtener historial de consultas
+      parameters:
+      - in: query
+        name: formato
+        schema:
+          type: string
+        description: Filtrar por formato (opcional)
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          default: 20
+        description: 'Número máximo de consultas a retornar (default: 20)'
+      tags:
+      - IA - Reportes Dinámicos
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Historial de consultas
+                examples:
+                - name: Historial
+                  value:
+                    count: 2
+                    results:
+                    - id: 1
+                      prompt: Quiero un reporte de ventas de octubre en PDF
+                      formato_salida: pdf
+                      fecha_consulta: '2024-11-04T20:00:00Z'
+                      tiempo_ejecucion: 0.45
+                      error: null
+          description: ''
+  /api/notificaciones/admin/:
+    get:
+      operationId: api_notificaciones_admin_list
+      description: |-
+        ViewSet para gestionar notificaciones de administradores.
+        Solo administradores y vendedores pueden acceder.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificacionAdminList'
+          description: ''
+    post:
+      operationId: api_notificaciones_admin_create
+      description: |-
+        ViewSet para gestionar notificaciones de administradores.
+        Solo administradores y vendedores pueden acceder.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificacionAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NotificacionAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NotificacionAdmin'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificacionAdmin'
+          description: ''
+  /api/notificaciones/admin/{id}/:
+    get:
+      operationId: api_notificaciones_admin_retrieve
+      description: |-
+        ViewSet para gestionar notificaciones de administradores.
+        Solo administradores y vendedores pueden acceder.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Notificación Admin.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificacionAdmin'
+          description: ''
+    put:
+      operationId: api_notificaciones_admin_update
+      description: |-
+        ViewSet para gestionar notificaciones de administradores.
+        Solo administradores y vendedores pueden acceder.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Notificación Admin.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificacionAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NotificacionAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NotificacionAdmin'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificacionAdmin'
+          description: ''
+    patch:
+      operationId: api_notificaciones_admin_partial_update
+      description: |-
+        ViewSet para gestionar notificaciones de administradores.
+        Solo administradores y vendedores pueden acceder.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Notificación Admin.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificacionAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificacionAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificacionAdmin'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificacionAdmin'
+          description: ''
+    delete:
+      operationId: api_notificaciones_admin_destroy
+      description: |-
+        ViewSet para gestionar notificaciones de administradores.
+        Solo administradores y vendedores pueden acceder.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Notificación Admin.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/notificaciones/admin/polling/:
+    get:
+      operationId: api_notificaciones_admin_polling_retrieve
+      description: Retorna las notificaciones recientes del administrador con conteo
+        de no leídas
+      summary: Obtener notificaciones del admin (polling)
+      tags:
+      - Notificaciones Admin
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Notificaciones del admin
+                examples:
+                - name: Respuesta exitosa
+                  value:
+                    notifications:
+                    - id: 1
+                      tipo: nueva_compra
+                      titulo: 🛒 Nueva Compra Realizada
+                      mensaje: Juan Pérez realizó una compra de $899.99
+                      url: /admin/ventas/123
+                      datos:
+                        compra_id: 123
+                        cliente_id: 456
+                      creada: '2025-11-12T22:30:00Z'
+                      leida: false
+                    unread_count: 3
+                    total_count: 15
+          description: ''
+  /api/notificaciones/historial/:
+    get:
+      operationId: api_notificaciones_historial_list
+      description: ViewSet de solo lectura para ver el historial de notificaciones
+        del usuario.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificacionEnviadaList'
+          description: ''
+  /api/notificaciones/historial/{id}/:
+    get:
+      operationId: api_notificaciones_historial_retrieve
+      description: ViewSet de solo lectura para ver el historial de notificaciones
+        del usuario.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Notificación Enviada.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificacionEnviada'
+          description: ''
+  /api/notificaciones/historial/marcar_todas_leidas/:
+    post:
+      operationId: api_notificaciones_historial_marcar_todas_leidas_create
+      description: Marca todas las notificaciones del usuario como leídas (opcional,
+        para futuras mejoras)
+      summary: Marcar todas como leídas
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificacionEnviada'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NotificacionEnviada'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NotificacionEnviada'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Notificaciones marcadas como leídas
+          description: ''
+  /api/notificaciones/subscriptions/:
+    get:
+      operationId: api_notificaciones_subscriptions_list
+      description: ViewSet para gestionar suscripciones push del usuario autenticado.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPushSubscriptionList'
+          description: ''
+    post:
+      operationId: api_notificaciones_subscriptions_create
+      description: ViewSet para gestionar suscripciones push del usuario autenticado.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushSubscription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PushSubscription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PushSubscription'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PushSubscription'
+          description: ''
+  /api/notificaciones/subscriptions/{id}/:
+    get:
+      operationId: api_notificaciones_subscriptions_retrieve
+      description: ViewSet para gestionar suscripciones push del usuario autenticado.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Suscripción Push.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PushSubscription'
+          description: ''
+    put:
+      operationId: api_notificaciones_subscriptions_update
+      description: ViewSet para gestionar suscripciones push del usuario autenticado.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Suscripción Push.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushSubscription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PushSubscription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PushSubscription'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PushSubscription'
+          description: ''
+    patch:
+      operationId: api_notificaciones_subscriptions_partial_update
+      description: ViewSet para gestionar suscripciones push del usuario autenticado.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Suscripción Push.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPushSubscription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPushSubscription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPushSubscription'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PushSubscription'
+          description: ''
+    delete:
+      operationId: api_notificaciones_subscriptions_destroy
+      description: ViewSet para gestionar suscripciones push del usuario autenticado.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Suscripción Push.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/notificaciones/subscriptions/{id}/activar/:
+    post:
+      operationId: api_notificaciones_subscriptions_activar_create
+      description: Reactiva una suscripción push previamente desactivada
+      summary: Activar suscripción
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Suscripción Push.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushSubscription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PushSubscription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PushSubscription'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Suscripción activada
+          description: ''
+  /api/notificaciones/subscriptions/{id}/desactivar/:
+    post:
+      operationId: api_notificaciones_subscriptions_desactivar_create
+      description: Desactiva una suscripción push específica
+      summary: Desactivar suscripción
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Suscripción Push.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushSubscription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PushSubscription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PushSubscription'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Suscripción desactivada
+          description: ''
+  /api/notificaciones/vapid-public-key/:
+    get:
+      operationId: api_notificaciones_vapid_public_key_retrieve
+      description: "\n        Retorna la clave pública VAPID necesaria para que el\
+        \ frontend se suscriba a notificaciones push.\n        Esta clave es segura\
+        \ de exponer públicamente.\n        "
+      summary: Obtener clave pública VAPID
+      tags:
+      - Notificaciones Push
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Clave pública VAPID
+                examples:
+                - name: Clave VAPID
+                  value:
+                    public_key: BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtmSJnSKawqXdmUfvO0lqVpF4qfX3...
+          description: ''
+  /api/productos/:
+    get:
+      operationId: api_productos_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProductoList'
+          description: ''
+    post:
+      operationId: api_productos_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Producto'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Producto'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Producto'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Producto'
+          description: ''
+  /api/productos/{id}/:
+    get:
+      operationId: api_productos_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Producto.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Producto'
+          description: ''
+    put:
+      operationId: api_productos_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Producto.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Producto'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Producto'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Producto'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Producto'
+          description: ''
+    patch:
+      operationId: api_productos_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Producto.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProducto'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProducto'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProducto'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Producto'
+          description: ''
+    delete:
+      operationId: api_productos_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Producto.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/productos/categorias/:
+    get:
+      operationId: api_productos_categorias_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCategoriaList'
+          description: ''
+    post:
+      operationId: api_productos_categorias_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Categoria'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Categoria'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Categoria'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Categoria'
+          description: ''
+  /api/productos/categorias/{id}/:
+    get:
+      operationId: api_productos_categorias_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Categoría.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Categoria'
+          description: ''
+    put:
+      operationId: api_productos_categorias_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Categoría.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Categoria'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Categoria'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Categoria'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Categoria'
+          description: ''
+    patch:
+      operationId: api_productos_categorias_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Categoría.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoria'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoria'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoria'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Categoria'
+          description: ''
+    delete:
+      operationId: api_productos_categorias_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Categoría.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/promociones/devoluciones/:
+    get:
+      operationId: api_promociones_devoluciones_list
+      description: |-
+        ViewSet para gestión de devoluciones.
+        Clientes pueden crear y ver sus devoluciones.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDevolucionProductoList'
+          description: ''
+    post:
+      operationId: api_promociones_devoluciones_create
+      description: Crear solicitud de devolución
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DevolucionCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DevolucionCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DevolucionCreate'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevolucionCreate'
+          description: ''
+  /api/promociones/devoluciones/{id}/:
+    get:
+      operationId: api_promociones_devoluciones_retrieve
+      description: |-
+        ViewSet para gestión de devoluciones.
+        Clientes pueden crear y ver sus devoluciones.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Devolución.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevolucionProducto'
+          description: ''
+    put:
+      operationId: api_promociones_devoluciones_update
+      description: |-
+        ViewSet para gestión de devoluciones.
+        Clientes pueden crear y ver sus devoluciones.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Devolución.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DevolucionProducto'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DevolucionProducto'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DevolucionProducto'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevolucionProducto'
+          description: ''
+    patch:
+      operationId: api_promociones_devoluciones_partial_update
+      description: |-
+        ViewSet para gestión de devoluciones.
+        Clientes pueden crear y ver sus devoluciones.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Devolución.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDevolucionProducto'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedDevolucionProducto'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedDevolucionProducto'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevolucionProducto'
+          description: ''
+    delete:
+      operationId: api_promociones_devoluciones_destroy
+      description: |-
+        ViewSet para gestión de devoluciones.
+        Clientes pueden crear y ver sus devoluciones.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Devolución.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/promociones/devoluciones/{id}/cancelar/:
+    post:
+      operationId: api_promociones_devoluciones_cancelar_create
+      description: Permite al cliente cancelar su solicitud (solo si está pendiente).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Devolución.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DevolucionProducto'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DevolucionProducto'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DevolucionProducto'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevolucionProducto'
+          description: ''
+  /api/promociones/promociones/:
+    get:
+      operationId: api_promociones_promociones_list
+      description: ViewSet de solo lectura para que los clientes vean promociones
+        disponibles.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPromocionList'
+          description: ''
+  /api/promociones/promociones/{id}/:
+    get:
+      operationId: api_promociones_promociones_retrieve
+      description: ViewSet de solo lectura para que los clientes vean promociones
+        disponibles.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Promoción.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Promocion'
+          description: ''
+  /api/promociones/promociones/validar/:
+    post:
+      operationId: api_promociones_promociones_validar_create
+      description: |-
+        Valida un código de promoción y calcula el descuento.
+        Body: { "codigo": "VERANO2025", "monto": 100.00 }
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Promocion'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Promocion'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Promocion'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Promocion'
+          description: ''
+  /api/reportes/health/:
+    get:
+      operationId: api_reportes_health_retrieve
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/reportes/kpis/:
+    get:
+      operationId: api_reportes_kpis_retrieve
+      description: KPIs rápidos para dashboard administrativo.
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/reportes/series/ventas-por-dia/:
+    get:
+      operationId: api_reportes_series_ventas_por_dia_retrieve
+      description: 'Serie temporal: ventas por día (completa con ceros).'
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/reportes/summary/:
+    get:
+      operationId: api_reportes_summary_retrieve
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/reportes/ventas/por-categoria/:
+    get:
+      operationId: api_reportes_ventas_por_categoria_retrieve
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/reportes/ventas/por-producto/:
+    get:
+      operationId: api_reportes_ventas_por_producto_retrieve
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/reportes/ventas/top-clientes/:
+    get:
+      operationId: api_reportes_ventas_top_clientes_retrieve
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/schema/:
+    get:
+      operationId: api_schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/usuarios/:
+    get:
+      operationId: api_usuarios_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUsuarioList'
+          description: ''
+    post:
+      operationId: api_usuarios_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Usuario'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Usuario'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Usuario'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+          description: ''
+  /api/usuarios/{id}/:
+    get:
+      operationId: api_usuarios_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Usuario.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+          description: ''
+    put:
+      operationId: api_usuarios_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Usuario.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Usuario'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Usuario'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Usuario'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+          description: ''
+    patch:
+      operationId: api_usuarios_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Usuario.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUsuario'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUsuario'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUsuario'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+          description: ''
+    delete:
+      operationId: api_usuarios_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Usuario.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/usuarios/me/:
+    get:
+      operationId: api_usuarios_me_retrieve
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+          description: ''
+    patch:
+      operationId: api_usuarios_me_partial_update
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUsuario'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUsuario'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUsuario'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+          description: ''
+  /api/usuarios/register/:
+    post:
+      operationId: api_usuarios_register_create
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/usuarios/token/:
+    post:
+      operationId: api_usuarios_token_create
+      description: |-
+        Devuelve un token aceptando username o email + password.
+        CSRF no requerido (sin autenticadores), apto para frontend React.
+      tags:
+      - api
+      security:
+      - {}
+      responses:
+        '200':
+          description: No response body
+components:
+  schemas:
+    Categoria:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nombre:
+          type: string
+          maxLength: 100
+        slug:
+          type: string
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+      required:
+      - id
+      - nombre
+      - slug
+    Cliente:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        usuario:
+          type: integer
+          readOnly: true
+          nullable: true
+          description: Usuario asociado (si el cliente tiene cuenta)
+        usuario_username:
+          type: string
+          readOnly: true
+          nullable: true
+        nombre:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        telefono:
+          type: string
+          maxLength: 20
+        direccion:
+          type: string
+          maxLength: 255
+        asignado_a:
+          type: integer
+          readOnly: true
+          nullable: true
+        asignado_a_nombre:
+          type: string
+          readOnly: true
+          nullable: true
+        fecha_creacion:
+          type: string
+          format: date-time
+          readOnly: true
+        fecha_actualizacion:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - asignado_a
+      - asignado_a_nombre
+      - fecha_actualizacion
+      - fecha_creacion
+      - id
+      - nombre
+      - usuario
+      - usuario_username
+    Compra:
+      type: object
+      description: Serializer para compras con items anidados
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        cliente:
+          type: integer
+        cliente_nombre:
+          type: string
+          readOnly: true
+        fecha:
+          type: string
+          format: date-time
+          readOnly: true
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+        observaciones:
+          type: string
+          maxLength: 255
+        pago_referencia:
+          type: string
+          maxLength: 100
+        pagado_en:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        esta_pagada:
+          type: boolean
+          readOnly: true
+        stripe_session_id:
+          type: string
+          readOnly: true
+        stripe_payment_intent:
+          type: string
+          readOnly: true
+        promocion:
+          type: integer
+          nullable: true
+        promocion_codigo:
+          type: string
+          readOnly: true
+        descuento_aplicado:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompraItem'
+          readOnly: true
+      required:
+      - cliente
+      - cliente_nombre
+      - descuento_aplicado
+      - esta_pagada
+      - fecha
+      - id
+      - items
+      - pagado_en
+      - promocion_codigo
+      - stripe_payment_intent
+      - stripe_session_id
+      - total
+    CompraItem:
+      type: object
+      description: Serializer para items de compra con información del producto
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        producto:
+          type: integer
+        producto_nombre:
+          type: string
+          readOnly: true
+        producto_sku:
+          type: string
+          readOnly: true
+        cantidad:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+        precio_unitario:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        subtotal:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+      required:
+      - cantidad
+      - id
+      - precio_unitario
+      - producto
+      - producto_nombre
+      - producto_sku
+      - subtotal
+    DevolucionCreate:
+      type: object
+      description: Serializer simplificado para crear devoluciones desde el cliente
+      properties:
+        compra_item:
+          type: integer
+        tipo:
+          $ref: '#/components/schemas/TipoCedEnum'
+        motivo:
+          type: string
+          maxLength: 255
+        descripcion:
+          type: string
+        cantidad:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+      required:
+      - cantidad
+      - compra_item
+      - motivo
+    DevolucionProducto:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        compra_item:
+          type: integer
+        compra_item_info:
+          type: string
+          readOnly: true
+        cliente:
+          type: integer
+        cliente_nombre:
+          type: string
+          readOnly: true
+        tipo:
+          $ref: '#/components/schemas/TipoCedEnum'
+        tipo_display:
+          type: string
+          readOnly: true
+        estado:
+          $ref: '#/components/schemas/DevolucionProductoEstadoEnum'
+        estado_display:
+          type: string
+          readOnly: true
+        motivo:
+          type: string
+          maxLength: 255
+        descripcion:
+          type: string
+        cantidad:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+        monto_reembolso:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        fecha_solicitud:
+          type: string
+          format: date-time
+          readOnly: true
+        fecha_aprobacion:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        fecha_rechazo:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        fecha_completado:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        respuesta_admin:
+          type: string
+          readOnly: true
+        producto_reemplazo:
+          type: integer
+          nullable: true
+        puede_cancelar:
+          type: string
+          readOnly: true
+        dentro_garantia:
+          type: string
+          readOnly: true
+      required:
+      - cantidad
+      - cliente
+      - cliente_nombre
+      - compra_item
+      - compra_item_info
+      - dentro_garantia
+      - estado_display
+      - fecha_aprobacion
+      - fecha_completado
+      - fecha_rechazo
+      - fecha_solicitud
+      - id
+      - monto_reembolso
+      - motivo
+      - puede_cancelar
+      - respuesta_admin
+      - tipo_display
+    DevolucionProductoEstadoEnum:
+      enum:
+      - pendiente
+      - aprobada
+      - rechazada
+      - completada
+      type: string
+      description: |-
+        * `pendiente` - Pendiente de Revisión
+        * `aprobada` - Aprobada
+        * `rechazada` - Rechazada
+        * `completada` - Completada
+    NotificacionAdmin:
+      type: object
+      description: Serializer para notificaciones de administradores.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        tipo:
+          $ref: '#/components/schemas/NotificacionAdminTipoEnum'
+        tipo_display:
+          type: string
+          readOnly: true
+        titulo:
+          type: string
+          maxLength: 200
+        mensaje:
+          type: string
+        url:
+          type: string
+          format: uri
+          description: URL para redirigir al hacer clic
+          maxLength: 200
+        datos:
+          nullable: true
+          description: Datos adicionales de la notificación (compra_id, cliente_id,
+            etc.)
+        creada:
+          type: string
+          format: date-time
+          readOnly: true
+        usuario_display:
+          type: string
+          readOnly: true
+      required:
+      - creada
+      - id
+      - mensaje
+      - tipo
+      - tipo_display
+      - titulo
+      - usuario_display
+    NotificacionAdminTipoEnum:
+      enum:
+      - nueva_compra
+      - nuevo_pago
+      - sistema
+      - stock_bajo
+      - error_pago
+      type: string
+      description: |-
+        * `nueva_compra` - Nueva Compra
+        * `nuevo_pago` - Nuevo Pago
+        * `sistema` - Sistema
+        * `stock_bajo` - Stock Bajo
+        * `error_pago` - Error de Pago
+    NotificacionEnviada:
+      type: object
+      description: Serializer para historial de notificaciones (solo lectura).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        tipo:
+          allOf:
+          - $ref: '#/components/schemas/NotificacionEnviadaTipoEnum'
+          readOnly: true
+        tipo_display:
+          type: string
+          readOnly: true
+        titulo:
+          type: string
+          readOnly: true
+        mensaje:
+          type: string
+          readOnly: true
+        datos_extra:
+          readOnly: true
+          nullable: true
+          description: Datos adicionales de la notificación
+        estado:
+          allOf:
+          - $ref: '#/components/schemas/NotificacionEnviadaEstadoEnum'
+          readOnly: true
+        estado_display:
+          type: string
+          readOnly: true
+        error:
+          type: string
+          readOnly: true
+        fecha_envio:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - datos_extra
+      - error
+      - estado
+      - estado_display
+      - fecha_envio
+      - id
+      - mensaje
+      - tipo
+      - tipo_display
+      - titulo
+    NotificacionEnviadaEstadoEnum:
+      enum:
+      - exitoso
+      - fallido
+      - pendiente
+      type: string
+      description: |-
+        * `exitoso` - Exitoso
+        * `fallido` - Fallido
+        * `pendiente` - Pendiente
+    NotificacionEnviadaTipoEnum:
+      enum:
+      - compra_exitosa
+      - cambio_estado
+      - promocion
+      - nueva_compra
+      - nuevo_pago
+      - otro
+      type: string
+      description: |-
+        * `compra_exitosa` - Compra Exitosa
+        * `cambio_estado` - Cambio de Estado
+        * `promocion` - Promoción
+        * `nueva_compra` - Nueva Compra (Admin)
+        * `nuevo_pago` - Nuevo Pago (Admin)
+        * `otro` - Otro
+    PaginatedCategoriaList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Categoria'
+    PaginatedClienteList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Cliente'
+    PaginatedCompraList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Compra'
+    PaginatedDevolucionProductoList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DevolucionProducto'
+    PaginatedNotificacionAdminList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificacionAdmin'
+    PaginatedNotificacionEnviadaList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificacionEnviada'
+    PaginatedProductoList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Producto'
+    PaginatedPromocionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Promocion'
+    PaginatedPushSubscriptionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PushSubscription'
+    PaginatedUsuarioList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Usuario'
+    PatchedCategoria:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nombre:
+          type: string
+          maxLength: 100
+        slug:
+          type: string
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+    PatchedCliente:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        usuario:
+          type: integer
+          readOnly: true
+          nullable: true
+          description: Usuario asociado (si el cliente tiene cuenta)
+        usuario_username:
+          type: string
+          readOnly: true
+          nullable: true
+        nombre:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        telefono:
+          type: string
+          maxLength: 20
+        direccion:
+          type: string
+          maxLength: 255
+        asignado_a:
+          type: integer
+          readOnly: true
+          nullable: true
+        asignado_a_nombre:
+          type: string
+          readOnly: true
+          nullable: true
+        fecha_creacion:
+          type: string
+          format: date-time
+          readOnly: true
+        fecha_actualizacion:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedCompra:
+      type: object
+      description: Serializer para compras con items anidados
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        cliente:
+          type: integer
+        cliente_nombre:
+          type: string
+          readOnly: true
+        fecha:
+          type: string
+          format: date-time
+          readOnly: true
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+        observaciones:
+          type: string
+          maxLength: 255
+        pago_referencia:
+          type: string
+          maxLength: 100
+        pagado_en:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        esta_pagada:
+          type: boolean
+          readOnly: true
+        stripe_session_id:
+          type: string
+          readOnly: true
+        stripe_payment_intent:
+          type: string
+          readOnly: true
+        promocion:
+          type: integer
+          nullable: true
+        promocion_codigo:
+          type: string
+          readOnly: true
+        descuento_aplicado:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompraItem'
+          readOnly: true
+    PatchedDevolucionProducto:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        compra_item:
+          type: integer
+        compra_item_info:
+          type: string
+          readOnly: true
+        cliente:
+          type: integer
+        cliente_nombre:
+          type: string
+          readOnly: true
+        tipo:
+          $ref: '#/components/schemas/TipoCedEnum'
+        tipo_display:
+          type: string
+          readOnly: true
+        estado:
+          $ref: '#/components/schemas/DevolucionProductoEstadoEnum'
+        estado_display:
+          type: string
+          readOnly: true
+        motivo:
+          type: string
+          maxLength: 255
+        descripcion:
+          type: string
+        cantidad:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+        monto_reembolso:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        fecha_solicitud:
+          type: string
+          format: date-time
+          readOnly: true
+        fecha_aprobacion:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        fecha_rechazo:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        fecha_completado:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        respuesta_admin:
+          type: string
+          readOnly: true
+        producto_reemplazo:
+          type: integer
+          nullable: true
+        puede_cancelar:
+          type: string
+          readOnly: true
+        dentro_garantia:
+          type: string
+          readOnly: true
+    PatchedNotificacionAdmin:
+      type: object
+      description: Serializer para notificaciones de administradores.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        tipo:
+          $ref: '#/components/schemas/NotificacionAdminTipoEnum'
+        tipo_display:
+          type: string
+          readOnly: true
+        titulo:
+          type: string
+          maxLength: 200
+        mensaje:
+          type: string
+        url:
+          type: string
+          format: uri
+          description: URL para redirigir al hacer clic
+          maxLength: 200
+        datos:
+          nullable: true
+          description: Datos adicionales de la notificación (compra_id, cliente_id,
+            etc.)
+        creada:
+          type: string
+          format: date-time
+          readOnly: true
+        usuario_display:
+          type: string
+          readOnly: true
+    PatchedProducto:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        sku:
+          type: string
+          maxLength: 50
+        nombre:
+          type: string
+          maxLength: 150
+        descripcion:
+          type: string
+        precio:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        stock:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        activo:
+          type: boolean
+        categoria:
+          allOf:
+          - $ref: '#/components/schemas/Categoria'
+          readOnly: true
+        categoria_id:
+          type: integer
+          writeOnly: true
+          nullable: true
+        imagen:
+          type: string
+          format: uri
+          nullable: true
+          description: Imagen del producto (se optimizará automáticamente)
+        imagen_url:
+          type: string
+          readOnly: true
+        fecha_creacion:
+          type: string
+          format: date-time
+          readOnly: true
+        fecha_actualizacion:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedPushSubscription:
+      type: object
+      description: |-
+        Serializer para crear/actualizar suscripciones push.
+        El usuario se toma del request.user automáticamente.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        endpoint:
+          type: string
+          description: URL del endpoint de push del navegador
+        p256dh:
+          type: string
+          description: Clave pública del cliente para encriptación
+        auth:
+          type: string
+          description: Token de autenticación del cliente
+        user_agent:
+          type: string
+          description: User agent del navegador
+          maxLength: 500
+        activa:
+          type: boolean
+          description: Si la suscripción está activa
+        fecha_creacion:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedUsuario:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        rol:
+          $ref: '#/components/schemas/RolEnum'
+        telefono:
+          type: string
+          maxLength: 15
+    Producto:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        sku:
+          type: string
+          maxLength: 50
+        nombre:
+          type: string
+          maxLength: 150
+        descripcion:
+          type: string
+        precio:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        stock:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        activo:
+          type: boolean
+        categoria:
+          allOf:
+          - $ref: '#/components/schemas/Categoria'
+          readOnly: true
+        categoria_id:
+          type: integer
+          writeOnly: true
+          nullable: true
+        imagen:
+          type: string
+          format: uri
+          nullable: true
+          description: Imagen del producto (se optimizará automáticamente)
+        imagen_url:
+          type: string
+          readOnly: true
+        fecha_creacion:
+          type: string
+          format: date-time
+          readOnly: true
+        fecha_actualizacion:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - categoria
+      - fecha_actualizacion
+      - fecha_creacion
+      - id
+      - imagen_url
+      - nombre
+      - precio
+      - sku
+    Promocion:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        codigo:
+          type: string
+          maxLength: 50
+        nombre:
+          type: string
+          maxLength: 150
+        descripcion:
+          type: string
+        tipo_descuento:
+          $ref: '#/components/schemas/TipoDescuentoEnum'
+        valor_descuento:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        descuento_maximo:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        monto_minimo:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        fecha_inicio:
+          type: string
+          format: date-time
+        fecha_fin:
+          type: string
+          format: date-time
+          nullable: true
+        activa:
+          type: boolean
+        usos_maximos:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Dejar vacío para uso ilimitado
+        usos_actuales:
+          type: integer
+          readOnly: true
+        esta_vigente:
+          type: string
+          readOnly: true
+      required:
+      - codigo
+      - esta_vigente
+      - id
+      - nombre
+      - usos_actuales
+      - valor_descuento
+    PushSubscription:
+      type: object
+      description: |-
+        Serializer para crear/actualizar suscripciones push.
+        El usuario se toma del request.user automáticamente.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        endpoint:
+          type: string
+          description: URL del endpoint de push del navegador
+        p256dh:
+          type: string
+          description: Clave pública del cliente para encriptación
+        auth:
+          type: string
+          description: Token de autenticación del cliente
+        user_agent:
+          type: string
+          description: User agent del navegador
+          maxLength: 500
+        activa:
+          type: boolean
+          description: Si la suscripción está activa
+        fecha_creacion:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - auth
+      - endpoint
+      - fecha_creacion
+      - id
+      - p256dh
+    RolEnum:
+      enum:
+      - admin
+      - vendedor
+      - cliente
+      type: string
+      description: |-
+        * `admin` - Administrador
+        * `vendedor` - Vendedor
+        * `cliente` - Cliente
+    TipoCedEnum:
+      enum:
+      - devolucion
+      - cambio
+      type: string
+      description: |-
+        * `devolucion` - Devolución con Reembolso
+        * `cambio` - Cambio por otro Producto
+    TipoDescuentoEnum:
+      enum:
+      - porcentaje
+      - monto
+      type: string
+      description: |-
+        * `porcentaje` - Porcentaje
+        * `monto` - Monto Fijo
+    Usuario:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        rol:
+          $ref: '#/components/schemas/RolEnum'
+        telefono:
+          type: string
+          maxLength: 15
+      required:
+      - id
+      - username
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"

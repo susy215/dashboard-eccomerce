@@ -32,10 +32,23 @@ export const useAdminNotifications = () => {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch('/api/notificaciones/admin/', {
+      const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
+
+      if (!token) {
+        console.log('⚠️ No hay token JWT - omitiendo verificación');
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('🔍 Verificando notificaciones con token:', token.substring(0, 20) + '...');
+
+      const response = await fetch('https://smartsales365.duckdns.org/api/notificaciones/admin/', {
         method: 'GET',
         headers: getAuthHeaders(),
+        credentials: 'include'
       });
+
+      console.log('📡 Respuesta del servidor:', response.status, response.statusText);
 
       if (response.ok) {
         const data = await response.json();
@@ -132,8 +145,8 @@ export const useAdminNotifications = () => {
       const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
       if (!token) return;
 
-      const response = await fetch(`/api/notificaciones/${notificationId}/`, {
-        method: 'POST',
+      const response = await fetch(`https://smartsales365.duckdns.org/api/notificaciones/admin/${notificationId}/`, {
+        method: 'PATCH',
         headers: {
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json',
