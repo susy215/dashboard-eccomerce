@@ -164,10 +164,32 @@ export const useAdminNotifications = () => {
     };
   }, [isConnected, sendPing]);
 
-  // Conectar WebSocket al montar (autenticación por cookies)
+  // Conectar WebSocket después de verificar autenticación
   useEffect(() => {
-    console.log('🚀 Iniciando conexión WebSocket...');
-    connect();
+    const initWebSocket = async () => {
+      // Hacer una petición API para asegurar que Django tenga la sesión
+      try {
+        const token = localStorage.getItem('token') || localStorage.getItem('auth_token')
+        if (token) {
+          await fetch('https://smartsales365.duckdns.org/api/usuarios/me/', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Token ${token}`,
+              'Accept': 'application/json'
+            },
+            credentials: 'include'
+          })
+        }
+      } catch (err) {
+        console.warn('No se pudo verificar sesión:', err)
+      }
+
+      // Ahora intentar conectar WebSocket
+      console.log('🚀 Iniciando conexión WebSocket...')
+      connect()
+    }
+
+    initWebSocket()
 
     return () => {
       // Cleanup se maneja en el effect de cleanup separado

@@ -1,50 +1,34 @@
 import { apiFetch } from './client'
 
-// Login usando API REST + creación de sesión Django para WebSocket
+// Login usando API REST (Django maneja sesiones automáticamente)
 export async function login({ username, password }) {
   try {
-    // Paso 1: Login via API REST (obtiene token JWT)
-    const tokenResponse = await fetch('https://smartsales365.duckdns.org/api/usuarios/token/', {
+    const response = await fetch('https://smartsales365.duckdns.org/api/usuarios/token/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
       body: JSON.stringify({ username, password }),
-      credentials: 'include'
+      credentials: 'include' // Django creará sesión automáticamente
     })
 
-    if (!tokenResponse.ok) {
-      const errorText = await tokenResponse.text()
-      console.error('Token login failed:', tokenResponse.status, errorText)
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('Login failed:', response.status, errorText)
       throw new Error('Credenciales inválidas')
     }
 
-    const tokenData = await tokenResponse.json()
+    const data = await response.json()
 
     // Guardar token y username
     try {
-      localStorage.setItem('token', tokenData.token)
-      localStorage.setItem('auth_token', tokenData.token)
+      localStorage.setItem('token', data.token)
+      localStorage.setItem('auth_token', data.token)
       localStorage.setItem('username', username)
     } catch {}
 
-    // Paso 2: Crear sesión Django para WebSocket (usando el token)
-    try {
-      await fetch('https://smartsales365.duckdns.org/api/auth/session/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Token ${tokenData.token}`
-        },
-        credentials: 'include'
-      })
-    } catch (sessionErr) {
-      console.warn('No se pudo crear sesión Django, pero login fue exitoso:', sessionErr)
-      // No fallar si la sesión no se crea, el login básico funcionó
-    }
-
-    return { success: true, username, token: tokenData.token }
+    return { success: true, username, token: data.token }
   } catch (err) {
     console.error('Login error:', err)
     throw new Error('Credenciales inválidas')
