@@ -7,6 +7,9 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   build: {
     rollupOptions: {
+      input: {
+        main: 'index.html'
+      },
       output: {
         manualChunks: undefined,
       },
