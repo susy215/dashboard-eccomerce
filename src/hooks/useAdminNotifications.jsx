@@ -1,14 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 
-// Construir URL con token de autenticación
+// URL del WebSocket (autenticación por cookies de sesión)
 const getWebSocketUrl = () => {
-  const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
-  if (!token) {
-    console.warn('⚠️ No hay token JWT para WebSocket');
-    return null;
-  }
-  return `wss://smartsales365.duckdns.org/api/admin/notificaciones/ws/?token=${token}`;
+  // El backend usa cookies para autenticación, no tokens JWT en URL
+  return 'wss://smartsales365.duckdns.org/ws/admin/notifications';
 };
 
 export const useAdminNotifications = () => {
@@ -21,11 +17,6 @@ export const useAdminNotifications = () => {
   // Conectar WebSocket
   const connect = useCallback(() => {
     const wsUrl = getWebSocketUrl();
-    if (!wsUrl) {
-      console.error('❌ No se puede conectar WebSocket: no hay token JWT');
-      setConnectionStatus('Error: Sin autenticación');
-      return;
-    }
 
     if (ws.current) {
       ws.current.close();
@@ -173,26 +164,13 @@ export const useAdminNotifications = () => {
     };
   }, [isConnected, sendPing]);
 
-  // Reconectar cuando cambie el token (usuario se loguea)
+  // Conectar WebSocket al montar (autenticación por cookies)
   useEffect(() => {
-    const handleStorageChange = () => {
-      const newToken = localStorage.getItem('token') || localStorage.getItem('auth_token');
-      if (newToken && !ws.current) {
-        console.log('🔄 Token encontrado, conectando WebSocket...');
-        connect();
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-
-    // Intentar conectar inicialmente si hay token
-    const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
-    if (token && !ws.current) {
-      connect();
-    }
+    console.log('🚀 Iniciando conexión WebSocket...');
+    connect();
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      // Cleanup se maneja en el effect de cleanup separado
     };
   }, [connect]);
 
@@ -212,20 +190,20 @@ export const useAdminNotifications = () => {
 
   // Función de debug para consola del navegador
   const debugWebSocket = useCallback(() => {
-    const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
     const wsUrl = getWebSocketUrl();
+    const hasSessionCookie = document.cookie.includes('sessionid') || document.cookie.includes('csrftoken');
 
     console.log('🔍 Debug WebSocket:');
-    console.log('- Token JWT:', token ? `${token.substring(0, 20)}...` : '❌ No encontrado');
     console.log('- URL WebSocket:', wsUrl);
+    console.log('- Cookies de sesión:', hasSessionCookie ? '✅ Encontradas' : '❌ No encontradas');
     console.log('- Estado conexión:', isConnected ? '✅ Conectado' : '❌ Desconectado');
     console.log('- Estado detallado:', connectionStatus);
     console.log('- Notificaciones:', notifications.length);
     console.log('- No leídas:', unreadCount);
 
     return {
-      token: !!token,
       wsUrl,
+      hasSessionCookie,
       isConnected,
       connectionStatus,
       notificationCount: notifications.length,
