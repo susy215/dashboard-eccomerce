@@ -3,6 +3,8 @@ import { apiFetch } from './client'
 // Login usando API REST (Django maneja sesiones automáticamente)
 export async function login({ username, password }) {
   try {
+    console.log('🔐 Intentando login con:', username)
+
     const response = await fetch('https://smartsales365.duckdns.org/api/usuarios/token/', {
       method: 'POST',
       headers: {
@@ -13,24 +15,32 @@ export async function login({ username, password }) {
       credentials: 'include' // Django creará sesión automáticamente
     })
 
+    console.log('📡 Respuesta login:', response.status, response.statusText)
+
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('Login failed:', response.status, errorText)
+      console.error('❌ Login failed:', response.status, errorText)
       throw new Error('Credenciales inválidas')
     }
 
     const data = await response.json()
+    console.log('✅ Login exitoso, token recibido')
 
     // Guardar token y username
     try {
       localStorage.setItem('token', data.token)
       localStorage.setItem('auth_token', data.token)
       localStorage.setItem('username', username)
-    } catch {}
+
+      console.log('💾 Datos guardados en localStorage')
+      console.log('🍪 Cookies actuales:', document.cookie)
+    } catch (storageErr) {
+      console.error('❌ Error guardando en localStorage:', storageErr)
+    }
 
     return { success: true, username, token: data.token }
   } catch (err) {
-    console.error('Login error:', err)
+    console.error('❌ Login error:', err)
     throw new Error('Credenciales inválidas')
   }
 }

@@ -164,35 +164,54 @@ export const useAdminNotifications = () => {
     };
   }, [isConnected, sendPing]);
 
-  // Conectar WebSocket después de verificar autenticación
+  // Conectar WebSocket solo si hay autenticación válida
   useEffect(() => {
     const initWebSocket = async () => {
-      // Hacer una petición API para asegurar que Django tenga la sesión
-      try {
-        const token = localStorage.getItem('token') || localStorage.getItem('auth_token')
-        if (token) {
-          await fetch('https://smartsales365.duckdns.org/api/usuarios/me/', {
-            method: 'GET',
-            headers: {
-              'Authorization': `Token ${token}`,
-              'Accept': 'application/json'
-            },
-            credentials: 'include'
-          })
-        }
-      } catch (err) {
-        console.warn('No se pudo verificar sesión:', err)
+      const token = localStorage.getItem('token') || localStorage.getItem('auth_token')
+
+      console.log('🔍 Verificando autenticación para WebSocket...')
+      console.log('- Token JWT:', token ? '✅ Presente' : '❌ No encontrado')
+      console.log('- Cookies:', document.cookie)
+
+      if (!token) {
+        console.log('⚠️ No hay token JWT - WebSocket no se conectará')
+        return
       }
 
-      // Ahora intentar conectar WebSocket
-      console.log('🚀 Iniciando conexión WebSocket...')
-      connect()
+      // Verificar que el usuario esté autenticado haciendo una petición de prueba
+      try {
+        console.log('📡 Verificando autenticación con API...')
+        const authCheck = await fetch('https://smartsales365.duckdns.org/api/usuarios/me/', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Token ${token}`,
+            'Accept': 'application/json'
+          },
+          credentials: 'include'
+        })
+
+        console.log('📡 Respuesta verificación:', authCheck.status, authCheck.statusText)
+
+        if (!authCheck.ok) {
+          console.log('⚠️ Usuario no autenticado - WebSocket no se conectará')
+          return
+        }
+
+        const userData = await authCheck.json()
+        console.log('✅ Usuario autenticado:', userData.username)
+        console.log('🚀 Conectando WebSocket...')
+
+        connect()
+      } catch (err) {
+        console.warn('❌ Error verificando autenticación:', err)
+      }
     }
 
-    initWebSocket()
+    // Pequeño delay para asegurar que el login termine
+    const timer = setTimeout(initWebSocket, 2000)
 
     return () => {
-      // Cleanup se maneja en el effect de cleanup separado
+      clearTimeout(timer)
     };
   }, [connect]);
 
@@ -210,26 +229,65 @@ export const useAdminNotifications = () => {
     }
   }, []);
 
-  // Función de debug para consola del navegador
-  const debugWebSocket = useCallback(() => {
+  // Función de debug completa para diagnosticar problemas
+  const debugWebSocket = useCallback(async () => {
     const wsUrl = getWebSocketUrl();
+    const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
     const hasSessionCookie = document.cookie.includes('sessionid') || document.cookie.includes('csrftoken');
 
-    console.log('🔍 Debug WebSocket:');
-    console.log('- URL WebSocket:', wsUrl);
-    console.log('- Cookies de sesión:', hasSessionCookie ? '✅ Encontradas' : '❌ No encontradas');
-    console.log('- Estado conexión:', isConnected ? '✅ Conectado' : '❌ Desconectado');
-    console.log('- Estado detallado:', connectionStatus);
-    console.log('- Notificaciones:', notifications.length);
-    console.log('- No leídas:', unreadCount);
+    console.log('🔍 === DIAGNÓSTICO COMPLETO WEBSOCKET ===');
+    console.log('📡 URL WebSocket:', wsUrl);
+    console.log('🔑 Token JWT:', token ? `${token.substring(0, 20)}...` : '❌ No encontrado');
+    console.log('🍪 Cookies de sesión:', hasSessionCookie ? '✅ Encontradas' : '❌ No encontradas');
+    console.log('📋 Todas las cookies:', document.cookie || 'Ninguna');
+    console.log('🔌 Estado conexión:', isConnected ? '✅ Conectado' : '❌ Desconectado');
+    console.log('📊 Estado detallado:', connectionStatus);
+    console.log('🔔 Notificaciones:', notifications.length);
+    console.log('📨 No leídas:', unreadCount);
+
+    // Probar conexión API
+    try {
+      console.log('🔍 Probando conexión API...');
+      const apiTest = await fetch('https://smartsales365.duckdns.org/api/usuarios/me/', {
+        method: 'GET',
+        headers: token ? { 'Authorization': `Token ${token}` } : {},
+        credentials: 'include'
+      });
+      console.log('📡 API Response:', apiTest.status, apiTest.statusText);
+
+      if (apiTest.ok) {
+        const userData = await apiTest.json();
+        console.log('👤 Usuario API:', userData);
+      }
+    } catch (apiErr) {
+      console.error('❌ Error API:', apiErr);
+    }
+
+    // Probar WebSocket manual
+    try {
+      console.log('🔌 Probando WebSocket manual...');
+      const testWs = new WebSocket(wsUrl);
+      testWs.onopen = () => {
+        console.log('✅ WebSocket manual: CONECTADO');
+        testWs.close();
+      };
+      testWs.onerror = (err) => console.error('❌ WebSocket manual: ERROR', err);
+      testWs.onclose = (ev) => console.log('🔌 WebSocket manual: CERRADO', ev.code, ev.reason);
+    } catch (wsErr) {
+      console.error('❌ Error creando WebSocket:', wsErr);
+    }
+
+    console.log('🏁 === FIN DIAGNÓSTICO ===');
 
     return {
       wsUrl,
+      hasToken: !!token,
       hasSessionCookie,
       isConnected,
       connectionStatus,
       notificationCount: notifications.length,
-      unreadCount
+      unreadCount,
+      allCookies: document.cookie
     };
   }, [isConnected, connectionStatus, notifications.length, unreadCount]);
 
