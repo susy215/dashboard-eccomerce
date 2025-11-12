@@ -1,79 +1,85 @@
 import { apiFetch } from './client'
 
-// Login usando sistema de sesiones de Django (crea cookies de sesión para WebSocket)
+// Login usando API REST + creación de sesión Django para WebSocket
 export async function login({ username, password }) {
-  // Limpia datos previos
   try {
-    localStorage.removeItem('token')
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('username')
-  } catch {}
-
-  // Primero obtener página de login para conseguir CSRF token
-  try {
-    // Usar fetch directo para evitar el prefijo /api/
-    const response = await fetch('https://smartsales365.duckdns.org/admin/login/', {
-      method: 'GET',
+    // Paso 1: Login via API REST (obtiene token JWT)
+    const tokenResponse = await fetch('https://smartsales365.duckdns.org/api/usuarios/token/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ username, password }),
       credentials: 'include'
     })
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`)
+
+    if (!tokenResponse.ok) {
+      const errorText = await tokenResponse.text()
+      console.error('Token login failed:', tokenResponse.status, errorText)
+      throw new Error('Credenciales inválidas')
     }
+
+    const tokenData = await tokenResponse.json()
+
+    // Guardar token y username
+    try {
+      localStorage.setItem('token', tokenData.token)
+      localStorage.setItem('auth_token', tokenData.token)
+      localStorage.setItem('username', username)
+    } catch {}
+
+    // Paso 2: Crear sesión Django para WebSocket (usando el token)
+    try {
+      await fetch('https://smartsales365.duckdns.org/api/auth/session/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Token ${tokenData.token}`
+        },
+        credentials: 'include'
+      })
+    } catch (sessionErr) {
+      console.warn('No se pudo crear sesión Django, pero login fue exitoso:', sessionErr)
+      // No fallar si la sesión no se crea, el login básico funcionó
+    }
+
+    return { success: true, username, token: tokenData.token }
   } catch (err) {
-    console.warn('No se pudo obtener página de login:', err)
+    console.error('Login error:', err)
+    throw new Error('Credenciales inválidas')
   }
-
-  // Ahora hacer login con CSRF token
-  const csrfToken = getCsrfToken()
-  if (!csrfToken) {
-    throw new Error('No se pudo obtener CSRF token')
-  }
-
-  const form = new URLSearchParams()
-  form.append('username', username)
-  form.append('password', password)
-  form.append('csrfmiddlewaretoken', csrfToken)
-  form.append('next', '/admin/')
-
-  const response = await fetch('https://smartsales365.duckdns.org/admin/login/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'X-CSRFToken': csrfToken,
-    },
-    body: form,
-    credentials: 'include'
-  })
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`)
-  }
-
-  const data = await response.text()
-
-  // En Django, un login exitoso generalmente redirige
-  // Si no hay error, asumimos que fue exitoso
-  try {
-    localStorage.setItem('username', username)
-  } catch {}
-
-  return { success: true, username }
 }
 
-// Verificar si el usuario está autenticado (usando cookies de sesión)
+// Verificar si el usuario está autenticado (usando API)
 export async function checkAuth() {
   try {
-    const response = await fetch('https://smartsales365.duckdns.org/admin/', {
+    const token = localStorage.getItem('token') || localStorage.getItem('auth_token')
+    if (!token) {
+      return { authenticated: false }
+    }
+
+    const response = await fetch('https://smartsales365.duckdns.org/api/usuarios/me/', {
       method: 'GET',
+      headers: {
+        'Authorization': `Token ${token}`,
+        'Accept': 'application/json'
+      },
       credentials: 'include'
     })
+
     if (response.ok) {
-      return { authenticated: true, username: localStorage.getItem('username') }
+      const userData = await response.json()
+      return {
+        authenticated: true,
+        username: userData.username || localStorage.getItem('username')
+      }
     }
     return { authenticated: false }
   } catch (err) {
-    // Si falla, no está autenticado
-    return { authenticated: false }
+    // Si falla, verificar si al menos tenemos un token
+    const token = localStorage.getItem('token') || localStorage.getItem('auth_token')
+    return { authenticated: !!token, username: localStorage.getItem('username') }
   }
 }
 
@@ -100,11 +106,18 @@ function getCsrfToken() {
 
 export async function logout() {
   try {
-    // Logout via API (limpia sesión)
-    await fetch('https://smartsales365.duckdns.org/admin/logout/', {
-      method: 'POST',
-      credentials: 'include'
-    })
+    // Logout via API (limpia tokens y sesión)
+    const token = localStorage.getItem('token') || localStorage.getItem('auth_token')
+    if (token) {
+      await fetch('https://smartsales365.duckdns.org/api/auth/logout/', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
+    }
   } catch (err) {
     console.warn('Error en logout API:', err)
   }
