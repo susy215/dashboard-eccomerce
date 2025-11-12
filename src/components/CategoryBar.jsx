@@ -23,12 +23,12 @@ const COLORS = ['#10b981', '#06b6d4', '#8b5cf6', '#f59e0b', '#ec4899', '#3b82f6'
 
 export default function CategoryBar({ data }) {
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/60 via-slate-900/40 to-slate-900/60 backdrop-blur-xl p-6 hover:border-emerald-500/30 transition-all duration-500 slide-up">
+    <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/60 via-slate-900/40 to-slate-900/60 backdrop-blur-xl p-4 sm:p-6 hover:border-emerald-500/30 transition-all duration-500 slide-up">
       {/* Animated glow effect */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 blur-2xl -z-10" />
       
-      <ResponsiveContainer width="100%" height={320}>
-        <BarChart data={data} margin={{ left: 10, right: 10, top: 10, bottom: 20 }}>
+      <ResponsiveContainer width="100%" height={280} className="sm:h-[320px]">
+        <BarChart data={data} margin={{ left: 5, right: 5, top: 10, bottom: 30 }}>
           <defs>
             {COLORS.map((color, idx) => (
               <linearGradient key={idx} id={`fillCat${idx}`} x1="0" x2="0" y1="0" y2="1">
@@ -38,24 +38,24 @@ export default function CategoryBar({ data }) {
             ))}
           </defs>
           <CartesianGrid stroke="rgba(148, 163, 184, 0.08)" strokeDasharray="4 4" vertical={false} />
-          <XAxis 
-            dataKey="categoria" 
-            stroke="#64748b" 
-            tickLine={false} 
-            axisLine={{ stroke: 'rgba(148, 163, 184, 0.1)' }} 
-            interval={0} 
+          <XAxis
+            dataKey="categoria"
+            stroke="#64748b"
+            tickLine={false}
+            axisLine={{ stroke: 'rgba(148, 163, 184, 0.1)' }}
+            interval={0}
             angle={-15}
             textAnchor="end"
-            height={60}
-            tick={{ fontSize: 11 }}
+            height={50}
+            tick={{ fontSize: 9 }}
           />
-          <YAxis 
-            tickFormatter={formatNumber} 
-            stroke="#64748b" 
-            tickLine={false} 
-            axisLine={{ stroke: 'rgba(148, 163, 184, 0.1)' }} 
-            width={65}
-            tick={{ fontSize: 11 }}
+          <YAxis
+            tickFormatter={formatNumber}
+            stroke="#64748b"
+            tickLine={false}
+            axisLine={{ stroke: 'rgba(148, 163, 184, 0.1)' }}
+            width={55}
+            tick={{ fontSize: 9 }}
           />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }} />
           <Bar 

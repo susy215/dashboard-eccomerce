@@ -67,7 +67,7 @@ export default function Dashboard() {
       />
 
       {/* Main Content */}
-      <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <main className="flex-1 px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 max-w-7xl mx-auto">
         {loading && (
           <div className="mb-6 flex items-center gap-3 text-slate-400 fade-in">
             <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent" />
@@ -76,12 +76,12 @@ export default function Dashboard() {
         )}
 
         {/* KPIs */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <KpiCards kpis={kpis} />
         </div>
 
         {/* Charts Grid */}
-        <div className="space-y-8">
+        <div className="space-y-6 sm:space-y-8">
           {/* Serie de ventas */}
           <div>
             <div className="flex items-center gap-3 mb-3">
