@@ -32,7 +32,7 @@ export const useAdminNotifications = () => {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch('/api/notificaciones/admin/polling/', {
+      const response = await fetch('/api/notificaciones/admin/', {
         method: 'GET',
         headers: getAuthHeaders(),
       });
@@ -132,7 +132,7 @@ export const useAdminNotifications = () => {
       const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
       if (!token) return;
 
-      const response = await fetch(`https://smartsales365.duckdns.org/api/notificaciones/${notificationId}/read/`, {
+      const response = await fetch(`/api/notificaciones/${notificationId}/`, {
         method: 'POST',
         headers: {
           'Authorization': `Token ${token}`,
