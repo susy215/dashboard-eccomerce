@@ -1,15 +1,18 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 
-// URL del WebSocket (autenticación por token JWT)
-const getWebSocketUrl = () => {
+// Configuración del WebSocket
+const WS_URL = 'wss://smartsales365.duckdns.org/ws/admin/notifications';
+
+// Construir URL con token de autenticación
+const getWebSocketUrl = useCallback(() => {
   const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
   if (!token) {
     console.warn('⚠️ No hay token JWT para WebSocket');
     return null;
   }
-  return `wss://smartsales365.duckdns.org/ws/admin/notifications?token=${token}`;
-};
+  return `${WS_URL}?token=${token}`;
+}, []);
 
 export const useAdminNotifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -59,7 +62,7 @@ export const useAdminNotifications = () => {
         console.error('Error parsing WebSocket message:', error);
       }
     };
-  }, []);
+  }, [getWebSocketUrl]);
 
   // Manejar mensajes del WebSocket
   const handleMessage = useCallback((data) => {
@@ -168,17 +171,40 @@ export const useAdminNotifications = () => {
     };
   }, [isConnected, sendPing]);
 
-  // Conectar WebSocket cuando haya token JWT disponible
+  // Efectos
   useEffect(() => {
-    const token = localStorage.getItem('token') || localStorage.getItem('auth_token')
+    connect();
 
-    if (!token) {
-      console.log('⚠️ No hay token JWT - WebSocket no se conectará')
-      return
+    // Ping cada 30 segundos para mantener conexión viva
+    const pingInterval = setInterval(sendPing, 30000);
+
+    return () => {
+      clearInterval(pingInterval);
+      disconnect();
+    };
+  }, [connect, sendPing, disconnect]);
+
+  // Reconectar cuando cambie el token (usuario se loguea)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const newToken = localStorage.getItem('token') || localStorage.getItem('auth_token');
+      if (newToken && !ws.current) {
+        console.log('🔄 Token encontrado, conectando WebSocket...');
+        connect();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Intentar conectar inicialmente si hay token
+    const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
+    if (token && !ws.current) {
+      connect();
     }
 
-    console.log('🚀 Token JWT encontrado - conectando WebSocket...')
-    connect()
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, [connect]);
 
   // Cleanup al desmontar
@@ -195,48 +221,28 @@ export const useAdminNotifications = () => {
     }
   }, []);
 
-  // Función de debug para verificar WebSocket
+  // Función de debug para consola del navegador
   const debugWebSocket = useCallback(() => {
-    const wsUrl = getWebSocketUrl();
     const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
+    const wsUrl = getWebSocketUrl();
 
-    console.log('🔍 === ESTADO WEBSOCKET ===');
-    console.log('📡 URL WebSocket:', wsUrl);
-    console.log('🔑 Token JWT:', token ? `${token.substring(0, 20)}...` : '❌ No encontrado');
-    console.log('🔌 Estado conexión:', isConnected ? '✅ Conectado' : '❌ Desconectado');
-    console.log('📊 Estado detallado:', connectionStatus);
-    console.log('🔔 Notificaciones:', notifications.length);
-    console.log('📨 No leídas:', unreadCount);
-
-    // Probar WebSocket manual si hay URL
-    if (wsUrl) {
-      console.log('🔌 Probando conexión manual...');
-      const testWs = new WebSocket(wsUrl);
-      testWs.onopen = () => {
-        console.log('✅ WebSocket manual: ¡CONECTADO EXITOSAMENTE!');
-        testWs.close();
-      };
-      testWs.onerror = (err) => {
-        console.error('❌ WebSocket manual: ERROR DE CONEXIÓN', err);
-      };
-      testWs.onclose = (ev) => {
-        console.log('🔌 WebSocket manual: CONEXIÓN CERRADA', ev.code, ev.reason);
-      };
-    } else {
-      console.log('❌ No se puede probar: no hay token JWT');
-    }
-
-    console.log('🏁 === FIN DEBUG ===');
+    console.log('🔍 Debug WebSocket:');
+    console.log('- Token JWT:', token ? `${token.substring(0, 20)}...` : '❌ No encontrado');
+    console.log('- URL WebSocket:', wsUrl);
+    console.log('- Estado conexión:', isConnected ? '✅ Conectado' : '❌ Desconectado');
+    console.log('- Estado detallado:', connectionStatus);
+    console.log('- Notificaciones:', notifications.length);
+    console.log('- No leídas:', unreadCount);
 
     return {
+      token: !!token,
       wsUrl,
-      hasToken: !!token,
       isConnected,
       connectionStatus,
       notificationCount: notifications.length,
       unreadCount
     };
-  }, [isConnected, connectionStatus, notifications.length, unreadCount]);
+  }, [isConnected, connectionStatus, notifications.length, unreadCount, getWebSocketUrl]);
 
   return {
     notifications,
