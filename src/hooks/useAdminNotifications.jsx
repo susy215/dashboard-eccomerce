@@ -1,138 +1,214 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { setupAdminWebSocket, disconnectAdminWebSocket, disableWebSocket, adminNotificationsAPI } from '../services/adminNotifications'
+import { adminNotificationsAPI } from '../services/adminNotifications'
 import axios from 'axios'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
+// Utilidad para formatear fechas correctamente
+function formatNotificationDate(dateString) {
+  console.log('Formateando fecha - Input:', dateString, typeof dateString)
+
+  if (!dateString) {
+    console.log('Fecha vacía o null')
+    return 'Fecha desconocida'
+  }
+
+  try {
+    // Manejar diferentes formatos de fecha
+    let date
+
+    // Si es una cadena, intentar diferentes formatos
+    if (typeof dateString === 'string') {
+      // Intentar formato ISO primero
+      if (dateString.includes('T') && dateString.includes('Z')) {
+        date = new Date(dateString)
+      } else if (dateString.includes('T')) {
+        // Formato ISO sin Z
+        date = new Date(dateString + (dateString.includes('+') ? '' : 'Z'))
+      } else {
+        // Otros formatos
+        date = new Date(dateString)
+      }
+    } else {
+      // Si no es string, intentar convertir directamente
+      date = new Date(dateString)
+    }
+
+    console.log('Fecha parseada:', date, 'isValid:', !isNaN(date.getTime()))
+
+    // Verificar si la fecha es válida
+    if (isNaN(date.getTime())) {
+      console.log('Fecha inválida, retornando "Fecha desconocida"')
+      return 'Fecha desconocida'
+    }
+
+    // Formatear la fecha en español
+    const formatted = date.toLocaleString('es-ES', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+
+    console.log('Fecha formateada:', formatted)
+    return formatted
+  } catch (error) {
+    console.warn('Error formateando fecha:', error, dateString)
+    return 'Fecha desconocida'
+  }
+}
+
 export function useAdminNotifications(token) {
   const [notifications, setNotifications] = useState([])
-  const [unreadCount, setUnreadCount] = useState(0)
   const [isConnected, setIsConnected] = useState(false)
-  const [connectionMode, setConnectionMode] = useState('websocket') // 'websocket' | 'polling'
-  const wsRef = useRef(null)
+  const [connectionMode, setConnectionMode] = useState('polling')
+  const [loading, setLoading] = useState(false)
+
   const pollingIntervalRef = useRef(null)
-  const lastNotificationIdRef = useRef(null)
-  const notificationsRef = useRef([]) // Referencia para acceder al estado actual en callbacks
+  const processedIdsRef = useRef(new Set()) // Para evitar duplicados
+  const lastPollTimeRef = useRef(0)
+  const isInitializedRef = useRef(false)
 
-  // Mantener la referencia actualizada
-  useEffect(() => {
-    notificationsRef.current = notifications
-  }, [notifications])
-
+  // Cargar notificaciones iniciales (solo recientes para mejor performance)
   const loadNotifications = useCallback(async () => {
+    if (!token) return
+
+    setLoading(true)
     try {
+      // Cargar solo las últimas 20 notificaciones para mejor performance inicial
       const response = await adminNotificationsAPI.getNotifications(token)
-      setNotifications(response.data.results || [])
+      const notificationsData = (response.data.results || []).slice(0, 20)
+
+      // Limpiar IDs procesados para evitar conflictos
+      processedIdsRef.current.clear()
+
+      // Procesar fechas y asegurar campos requeridos
+      const processedNotifications = notificationsData
+        .map(notification => {
+          const fechaFormateada = formatNotificationDate(notification.creada);
+          console.log('Procesando notificación:', {
+            id: notification.id,
+            creada: notification.creada,
+            fechaFormateada: fechaFormateada
+          });
+
+          return {
+            ...notification,
+            fechaFormateada: fechaFormateada,
+            titulo: notification.titulo || 'Nueva Notificación',
+            mensaje: notification.mensaje || 'Sin mensaje',
+            tipo: notification.tipo || 'sistema'
+            // Eliminado: leida - ya no existe en el backend
+          };
+        })
+        .filter(notification => {
+          // Evitar duplicados basados en ID
+          if (processedIdsRef.current.has(notification.id)) {
+            return false
+          }
+          processedIdsRef.current.add(notification.id)
+          return true
+        })
+
+      setNotifications(processedNotifications)
+
+      console.log('📋 Notificaciones iniciales cargadas:', processedNotifications.length)
     } catch (error) {
-      console.error('Error cargando notificaciones:', error)
+      console.error('❌ Error cargando notificaciones:', error)
+    } finally {
+      setLoading(false)
     }
   }, [token])
 
-  const loadUnreadCount = useCallback(async () => {
-    try {
-      const response = await adminNotificationsAPI.getUnreadCount(token)
-      setUnreadCount(response.data.count || 0)
-    } catch (error) {
-      console.error('Error cargando conteo:', error)
-    }
-  }, [token])
+  // Las notificaciones ya no tienen estado leído/no leído
+  // Se eliminaron las funciones markAsRead y markAllAsRead
 
-  const markAsRead = useCallback(async (notificationId) => {
-    try {
-      // Nota: El backend no tiene endpoint para marcar individualmente,
-      // solo para marcar todas como leídas. Por ahora solo actualizamos localmente.
-      setNotifications(prev =>
-        prev.map(n => n.id === notificationId ? { ...n, leida: true } : n)
-      )
-      setUnreadCount(prev => Math.max(0, prev - 1))
-      console.log('Notificación marcada como leída localmente')
-    } catch (error) {
-      console.error('Error marcando como leída:', error)
-    }
-  }, [])
-
-  const markAllAsRead = useCallback(async () => {
-    try {
-      await adminNotificationsAPI.markAllAsRead(token)
-      setNotifications(prev => prev.map(n => ({ ...n, leida: true })))
-      setUnreadCount(0)
-    } catch (error) {
-      console.error('Error marcando todas como leídas:', error)
-    }
-  }, [token])
-
-  // Fallback a HTTP polling
+  // Polling simplificado - solo busca nuevas notificaciones
   const startHttpPolling = useCallback(() => {
-    console.log('🔄 Iniciando polling HTTP como fallback...')
+    console.log('🔄 Iniciando polling HTTP simplificado...')
 
     const pollForNotifications = async () => {
       try {
-        // Usar la función API que ya tiene el token configurado
-        const response = await adminNotificationsAPI.getUnreadCount(token)
+        const now = Date.now()
 
+        // Evitar polling demasiado frecuente (30 segundos mínimo)
+        if (now - lastPollTimeRef.current < 30000) {
+          return
+        }
+
+        lastPollTimeRef.current = now
+
+        // Obtener todas las notificaciones recientes (sin filtrar por leídas)
+        const response = await adminNotificationsAPI.getNotifications(token)
         const allNotifications = response.data.results || []
 
-        // Filtrar solo notificaciones de interés (compras y pagos)
-        const relevantNotifications = allNotifications.filter(n =>
-          n.tipo === 'nueva_compra' || n.tipo === 'nuevo_pago'
+        console.log('Datos del backend - Cantidad:', allNotifications.length)
+        if (allNotifications.length > 0) {
+          console.log('Primera notificación del backend:', allNotifications[0])
+          console.log('Campo "creada" de primera notificación:', allNotifications[0].creada)
+        }
+
+        // Filtrar solo las más recientes (últimas 50)
+        const recentNotifications = allNotifications
+          .slice(0, 50)
+          .sort((a, b) => b.id - a.id)
+
+        // Determinar cuáles son realmente nuevas
+        const newNotifications = recentNotifications.filter(n =>
+          !processedIdsRef.current.has(n.id)
         )
 
-        // Filtrar solo notificaciones nuevas (no vistas antes)
-        const reallyNewNotifications = lastNotificationIdRef.current
-          ? relevantNotifications.filter(n => n.id > lastNotificationIdRef.current)
-          : relevantNotifications
+        if (newNotifications.length > 0) {
+          console.log('🔔 Nuevas notificaciones detectadas:', newNotifications.length)
 
-        // Filtrar duplicados (por si el backend envía múltiples veces)
-        const uniqueNewNotifications = reallyNewNotifications.filter(newNotif =>
-          !notificationsRef.current.some(existingNotif => existingNotif.id === newNotif.id)
-        )
+          // Procesar nuevas notificaciones
+          const processedNewNotifications = newNotifications.map(notification => ({
+            ...notification,
+            fechaFormateada: formatNotificationDate(notification.creada),
+            titulo: notification.titulo || 'Nueva Notificación',
+            mensaje: notification.mensaje || 'Sin mensaje',
+            tipo: notification.tipo || 'sistema'
+          }))
 
-        if (uniqueNewNotifications.length > 0) {
-          console.log('🔔 Nuevas notificaciones únicas via HTTP:', uniqueNewNotifications.length)
+          // Agregar al estado (al principio para que aparezcan arriba)
+          setNotifications(prev => [...processedNewNotifications, ...prev])
 
-          // Agregar las nuevas notificaciones al estado
-          setNotifications(prev => [...uniqueNewNotifications, ...prev])
+          // Registrar IDs procesados
+          processedNewNotifications.forEach(n => processedIdsRef.current.add(n.id))
 
-          // Mostrar notificaciones del navegador para cada nueva
-          uniqueNewNotifications.forEach(notification => {
-            // Notificación del navegador (cuando está abierto)
-            if ('Notification' in window && Notification.permission === 'granted') {
-              new Notification(notification.titulo, {
-                body: notification.mensaje,
-                icon: '/admin-icon.png',
-                tag: `admin-${notification.id}`
-              })
-            }
-
-            // Enviar notificación push al backend (para cuando el navegador esté cerrado)
-            // El backend se encargará de enviar push notifications a través del service worker
-            console.log('📤 Enviando notificación push para:', notification.titulo)
-          })
-
-          // Actualizar el último ID visto (solo de las nuevas)
-          if (uniqueNewNotifications.length > 0) {
-            const maxNewId = Math.max(...uniqueNewNotifications.map(n => n.id))
-            lastNotificationIdRef.current = Math.max(lastNotificationIdRef.current || 0, maxNewId)
+          // Mostrar notificación del navegador (máximo 3 para no spamear)
+          if ('Notification' in window && Notification.permission === 'granted') {
+            processedNewNotifications.slice(0, 3).forEach(notification => {
+              try {
+                new Notification(notification.titulo, {
+                  body: notification.mensaje,
+                  icon: '/admin-icon.png',
+                  tag: `admin-${notification.id}`,
+                  requireInteraction: false,
+                  silent: false
+                })
+              } catch (error) {
+                console.warn('Error mostrando notificación del navegador:', error)
+              }
+            })
           }
         }
 
-        // Actualizar conteo total de no leídas (solo notificaciones relevantes no leídas)
-        const totalUnread = relevantNotifications.filter(n => !n.leida).length
-        setUnreadCount(totalUnread)
-
       } catch (error) {
-        console.error('Error en polling HTTP:', error)
+        console.error('❌ Error en polling HTTP:', error)
         if (error.response?.status === 401) {
-          console.error('❌ Error de autenticación - Token inválido')
+          console.error('🔐 Error de autenticación - Token inválido')
+          setIsConnected(false)
         }
       }
     }
 
-    // Polling cada 30 segundos
-    pollingIntervalRef.current = setInterval(pollForNotifications, 30000)
+    // Polling cada 45 segundos
+    pollingIntervalRef.current = setInterval(pollForNotifications, 45000)
 
-    // Primera verificación inmediata
-    pollForNotifications()
+    // Primera verificación inmediata después de un pequeño delay
+    setTimeout(pollForNotifications, 2000)
   }, [token])
 
   const stopHttpPolling = useCallback(() => {
@@ -142,34 +218,46 @@ export function useAdminNotifications(token) {
     }
   }, [])
 
+  // Limpiar notificaciones procesadas cuando cambie el token
   useEffect(() => {
-    if (!token) return
+    processedIdsRef.current.clear()
+    isInitializedRef.current = false
+  }, [token])
 
-    console.log('🔄 Iniciando sistema de notificaciones admin con HTTP polling')
+  // Inicialización del sistema
+  useEffect(() => {
+    if (!token) {
+      setIsConnected(false)
+      stopHttpPolling()
+      return
+    }
 
-    // Configurar modo polling desde el inicio
-    setConnectionMode('polling')
-    setIsConnected(true)
+    if (!isInitializedRef.current) {
+      console.log('🚀 Inicializando sistema de notificaciones admin')
 
-    // Cargar datos iniciales
-    loadNotifications()
-    loadUnreadCount()
+      setConnectionMode('polling')
+      setIsConnected(true)
 
-    // Iniciar polling HTTP inmediatamente
-    startHttpPolling()
+      // Cargar datos iniciales
+      loadNotifications()
+
+      // Iniciar polling
+      startHttpPolling()
+
+      isInitializedRef.current = true
+    }
 
     return () => {
       stopHttpPolling()
     }
-  }, [token, loadNotifications, loadUnreadCount, startHttpPolling, stopHttpPolling])
+  }, [token, loadNotifications, startHttpPolling, stopHttpPolling])
 
   return {
     notifications,
-    unreadCount,
     isConnected,
     connectionMode,
-    markAsRead,
-    markAllAsRead,
-    loadNotifications
+    loading,
+    loadNotifications,
+    formatNotificationDate
   }
 }

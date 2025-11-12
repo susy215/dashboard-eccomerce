@@ -3,6 +3,7 @@ import Dashboard from '../pages/Dashboard'
 import NotificationBadge from '../components/admin/NotificationBadge'
 import NotificationPanel from '../components/admin/NotificationPanel'
 import NotificationSettings from '../components/admin/NotificationSettings'
+import LogoutButton from '../components/admin/LogoutButton'
 import { registerServiceWorker } from '../services/pushNotifications'
 
 export default function AdminLayout() {
@@ -23,20 +24,23 @@ export default function AdminLayout() {
     }
 
     initServiceWorker()
+
+    // Escuchar eventos personalizados para abrir notificaciones
+    const handleOpenNotifications = () => {
+      setNotificationsOpen(true)
+    }
+
+    window.addEventListener('openNotifications', handleOpenNotifications)
+
+    return () => {
+      window.removeEventListener('openNotifications', handleOpenNotifications)
+    }
   }, [])
 
   return (
     <div className="min-h-screen">
-      {/* Dashboard con header integrado */}
+      {/* Dashboard con header integrado que incluye los botones */}
       <Dashboard />
-
-      {/* Notification Badge - posicionado absolutamente sobre el dashboard */}
-      <div className="fixed top-4 right-4 z-50">
-        <NotificationBadge
-          token={token}
-          onClick={() => setNotificationsOpen(true)}
-        />
-      </div>
 
       {/* Notification Settings */}
       <NotificationSettings

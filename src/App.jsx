@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login.jsx'
+import Home from './pages/Home.jsx'
 import AdminLayout from './layouts/AdminLayout.jsx'
 
 function RequireAuth({ children }) {
@@ -17,8 +18,9 @@ export default function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/" element={
+        <Route path="/dashboard" element={
           <RequireAuth>
             <AdminLayout />
           </RequireAuth>

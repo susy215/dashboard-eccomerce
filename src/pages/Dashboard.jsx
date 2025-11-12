@@ -4,6 +4,7 @@ import KpiCards from '../components/KpiCards';
 import SalesLine from '../components/SalesLine';
 import CategoryBar from '../components/CategoryBar';
 import TopList from '../components/TopList';
+import DashboardHeader from '../components/admin/DashboardHeader';
 
 export default function Dashboard() {
   const token = localStorage.getItem('token');
@@ -49,47 +50,24 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen pb-12">
-      {/* Floating Header with Glassmorphism */}
-      <div className="sticky top-0 z-50 backdrop-blur-xl bg-slate-900/40 border-b border-white/10 shadow-2xl">
-        <div className="px-4 py-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="fade-in">
-              <h1 className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400">
-                SmartSales365
-              </h1>
-              <p className="text-slate-400 text-sm mt-0.5">Dashboard Analítico en Tiempo Real</p>
-            </div>
-            <div className="flex items-center gap-2 fade-in">
-              <div className="inline-flex rounded-xl border border-white/10 bg-slate-900/60 backdrop-blur-sm p-1 shadow-lg">
-                {[7, 30, 90].map((d) => (
-                  <button
-                    key={d}
-                    onClick={() => setDias(d)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 ${
-                      dias === d
-                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
-                    }`}
-                  >
-                    {d}d
-                  </button>
-                ))}
-              </div>
-              <select
-                value={limit}
-                onChange={(e) => setLimit(Number(e.target.value))}
-                className="rounded-xl border border-white/10 bg-slate-900/60 backdrop-blur-sm text-slate-200 text-sm px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-              >
-                {[5, 10, 15].map((l) => <option key={l} value={l}>Top {l}</option>)}
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
+      {/* Header Unificado con Controles */}
+      <DashboardHeader
+        token={token}
+        onNotificationsOpen={() => {
+          // Esta función será manejada por el AdminLayout
+          if (window.dispatchEvent) {
+            window.dispatchEvent(new CustomEvent('openNotifications'));
+          }
+        }}
+        dias={dias}
+        setDias={setDias}
+        limit={limit}
+        setLimit={setLimit}
+      />
 
       {/* Main Content */}
-      <div className="px-4 py-6 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         {loading && (
           <div className="mb-6 flex items-center gap-3 text-slate-400 fade-in">
             <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent" />
@@ -140,7 +118,7 @@ export default function Dashboard() {
         <div className="mt-12 pt-6 border-t border-white/5 text-center text-slate-500 text-sm fade-in">
           <p>SmartSales365 · Dashboard Admin v1.0</p>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
