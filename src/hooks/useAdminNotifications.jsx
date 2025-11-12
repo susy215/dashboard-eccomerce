@@ -4,22 +4,22 @@ import ReconnectingWebSocket from 'reconnecting-websocket';
 // Configuración del WebSocket
 const WS_URL = 'wss://smartsales365.duckdns.org/ws/admin/notifications';
 
-// Construir URL con token de autenticación
-const getWebSocketUrl = useCallback(() => {
-  const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
-  if (!token) {
-    console.warn('⚠️ No hay token JWT para WebSocket');
-    return null;
-  }
-  return `${WS_URL}?token=${token}`;
-}, []);
-
 export const useAdminNotifications = () => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('Desconectado');
   const ws = useRef(null);
+
+  // Construir URL con token de autenticación
+  const getWebSocketUrl = () => {
+    const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
+    if (!token) {
+      console.warn('⚠️ No hay token JWT para WebSocket');
+      return null;
+    }
+    return `${WS_URL}?token=${token}`;
+  };
 
   // Conectar WebSocket
   const connect = useCallback(() => {
@@ -62,7 +62,7 @@ export const useAdminNotifications = () => {
         console.error('Error parsing WebSocket message:', error);
       }
     };
-  }, [getWebSocketUrl]);
+  }, []);
 
   // Manejar mensajes del WebSocket
   const handleMessage = useCallback((data) => {
@@ -242,7 +242,7 @@ export const useAdminNotifications = () => {
       notificationCount: notifications.length,
       unreadCount
     };
-  }, [isConnected, connectionStatus, notifications.length, unreadCount, getWebSocketUrl]);
+  }, [isConnected, connectionStatus, notifications.length, unreadCount]);
 
   return {
     notifications,
