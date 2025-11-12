@@ -83,6 +83,7 @@ export default function TopList({ title, rows, nameKey = 'nombre' }) {
         </table>
       </div>
     </div>
+    </div>
   );
 }
 
