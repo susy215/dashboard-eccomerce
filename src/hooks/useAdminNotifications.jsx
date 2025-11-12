@@ -1,7 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 
-const WS_URL = 'wss://smartsales365.duckdns.org/ws/admin/notifications';
+// Construir URL con token de autenticación
+const getWebSocketUrl = () => {
+  const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
+  if (!token) {
+    console.warn('⚠️ No hay token JWT para WebSocket');
+    return null;
+  }
+  return `wss://smartsales365.duckdns.org/api/admin/notificaciones/ws/?token=${token}`;
+};
 
 export const useAdminNotifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -12,11 +20,18 @@ export const useAdminNotifications = () => {
 
   // Conectar WebSocket
   const connect = useCallback(() => {
+    const wsUrl = getWebSocketUrl();
+    if (!wsUrl) {
+      console.error('❌ No se puede conectar WebSocket: no hay token JWT');
+      setConnectionStatus('Error: Sin autenticación');
+      return;
+    }
+
     if (ws.current) {
       ws.current.close();
     }
 
-    ws.current = new ReconnectingWebSocket(WS_URL, [], {
+    ws.current = new ReconnectingWebSocket(wsUrl, [], {
       maxReconnectionDelay: 10000,
       minReconnectionDelay: 1000,
       reconnectionDelayGrowFactor: 1.3,
@@ -147,18 +162,46 @@ export const useAdminNotifications = () => {
     setConnectionStatus('Desconectado');
   }, []);
 
-  // Efectos
+  // Ping cada 30 segundos para mantener conexión viva (solo si está conectado)
   useEffect(() => {
-    connect();
+    if (!isConnected) return;
 
-    // Ping cada 30 segundos para mantener conexión viva
     const pingInterval = setInterval(sendPing, 30000);
 
     return () => {
       clearInterval(pingInterval);
+    };
+  }, [isConnected, sendPing]);
+
+  // Reconectar cuando cambie el token (usuario se loguea)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const newToken = localStorage.getItem('token') || localStorage.getItem('auth_token');
+      if (newToken && !ws.current) {
+        console.log('🔄 Token encontrado, conectando WebSocket...');
+        connect();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Intentar conectar inicialmente si hay token
+    const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
+    if (token && !ws.current) {
+      connect();
+    }
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [connect]);
+
+  // Cleanup al desmontar
+  useEffect(() => {
+    return () => {
       disconnect();
     };
-  }, [connect, sendPing, disconnect]);
+  }, [disconnect]);
 
   // Solicitar permisos de notificación al montar
   useEffect(() => {
@@ -166,6 +209,29 @@ export const useAdminNotifications = () => {
       Notification.requestPermission();
     }
   }, []);
+
+  // Función de debug para consola del navegador
+  const debugWebSocket = useCallback(() => {
+    const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
+    const wsUrl = getWebSocketUrl();
+
+    console.log('🔍 Debug WebSocket:');
+    console.log('- Token JWT:', token ? `${token.substring(0, 20)}...` : '❌ No encontrado');
+    console.log('- URL WebSocket:', wsUrl);
+    console.log('- Estado conexión:', isConnected ? '✅ Conectado' : '❌ Desconectado');
+    console.log('- Estado detallado:', connectionStatus);
+    console.log('- Notificaciones:', notifications.length);
+    console.log('- No leídas:', unreadCount);
+
+    return {
+      token: !!token,
+      wsUrl,
+      isConnected,
+      connectionStatus,
+      notificationCount: notifications.length,
+      unreadCount
+    };
+  }, [isConnected, connectionStatus, notifications.length, unreadCount]);
 
   return {
     notifications,
@@ -176,5 +242,6 @@ export const useAdminNotifications = () => {
     getUnreadCount,
     sendPing,
     reconnect: connect,
+    debugWebSocket,
   };
 };
