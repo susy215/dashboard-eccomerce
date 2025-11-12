@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 
-const WS_URL = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws/admin/notifications/`;
+const WS_URL = 'wss://smartsales365.duckdns.org/ws/admin/notifications/';
 
 export const useAdminNotifications = () => {
   const [notifications, setNotifications] = useState([]);
