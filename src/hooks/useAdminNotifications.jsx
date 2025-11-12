@@ -179,10 +179,6 @@ export const useAdminNotifications = () => {
 
     console.log('🚀 Token JWT encontrado - conectando WebSocket...')
     connect()
-
-    return () => {
-      // Cleanup se maneja en el effect de cleanup separado
-    };
   }, [connect]);
 
   // Cleanup al desmontar
@@ -199,12 +195,12 @@ export const useAdminNotifications = () => {
     }
   }, []);
 
-  // Función de debug completa para diagnosticar problemas
-  const debugWebSocket = useCallback(async () => {
+  // Función de debug para verificar WebSocket
+  const debugWebSocket = useCallback(() => {
     const wsUrl = getWebSocketUrl();
     const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
 
-    console.log('🔍 === DIAGNÓSTICO COMPLETO WEBSOCKET ===');
+    console.log('🔍 === ESTADO WEBSOCKET ===');
     console.log('📡 URL WebSocket:', wsUrl);
     console.log('🔑 Token JWT:', token ? `${token.substring(0, 20)}...` : '❌ No encontrado');
     console.log('🔌 Estado conexión:', isConnected ? '✅ Conectado' : '❌ Desconectado');
@@ -212,43 +208,25 @@ export const useAdminNotifications = () => {
     console.log('🔔 Notificaciones:', notifications.length);
     console.log('📨 No leídas:', unreadCount);
 
-    // Probar conexión API
-    try {
-      console.log('🔍 Probando conexión API...');
-      const apiTest = await fetch('https://smartsales365.duckdns.org/api/usuarios/me/', {
-        method: 'GET',
-        headers: token ? { 'Authorization': `Token ${token}` } : {},
-        credentials: 'include'
-      });
-      console.log('📡 API Response:', apiTest.status, apiTest.statusText);
-
-      if (apiTest.ok) {
-        const userData = await apiTest.json();
-        console.log('👤 Usuario API:', userData);
-      }
-    } catch (apiErr) {
-      console.error('❌ Error API:', apiErr);
-    }
-
-    // Probar WebSocket manual
+    // Probar WebSocket manual si hay URL
     if (wsUrl) {
-      try {
-        console.log('🔌 Probando WebSocket manual...');
-        const testWs = new WebSocket(wsUrl);
-        testWs.onopen = () => {
-          console.log('✅ WebSocket manual: CONECTADO');
-          testWs.close();
-        };
-        testWs.onerror = (err) => console.error('❌ WebSocket manual: ERROR', err);
-        testWs.onclose = (ev) => console.log('🔌 WebSocket manual: CERRADO', ev.code, ev.reason);
-      } catch (wsErr) {
-        console.error('❌ Error creando WebSocket:', wsErr);
-      }
+      console.log('🔌 Probando conexión manual...');
+      const testWs = new WebSocket(wsUrl);
+      testWs.onopen = () => {
+        console.log('✅ WebSocket manual: ¡CONECTADO EXITOSAMENTE!');
+        testWs.close();
+      };
+      testWs.onerror = (err) => {
+        console.error('❌ WebSocket manual: ERROR DE CONEXIÓN', err);
+      };
+      testWs.onclose = (ev) => {
+        console.log('🔌 WebSocket manual: CONEXIÓN CERRADA', ev.code, ev.reason);
+      };
     } else {
-      console.log('❌ No se puede probar WebSocket: URL es null (no hay token)');
+      console.log('❌ No se puede probar: no hay token JWT');
     }
 
-    console.log('🏁 === FIN DIAGNÓSTICO ===');
+    console.log('🏁 === FIN DEBUG ===');
 
     return {
       wsUrl,
