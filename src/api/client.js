@@ -1,4 +1,4 @@
-const API_URL = (import.meta && import.meta.env && import.meta.env.VITE_API_URL) || 'http://localhost:8000'
+const API_URL = (import.meta && import.meta.env && import.meta.env.VITE_API_URL) || 'https://smartsales365.duckdns.org'
 
 function getToken() {
   try {
@@ -18,10 +18,9 @@ export async function apiFetch(path, options = {}) {
     headers.set('Content-Type', 'application/json')
   }
 
-  const token = getToken()
-  if (token) headers.set('Authorization', `Token ${token}`)
+  // No usar Authorization header - usamos cookies de sesión
 
-  const res = await fetch(url, { ...options, headers, credentials: 'omit' })
+  const res = await fetch(url, { ...options, headers, credentials: 'include' })
   if (res.status === 401) {
     try { localStorage.removeItem('token'); localStorage.removeItem('auth_token') } catch {}
     try {
