@@ -116,21 +116,16 @@ export const useAdminNotifications = () => {
     }
   }, []);
 
-  // Polling cada 30 segundos
+  // Polling DESHABILITADO - Solo verificación inicial
   useEffect(() => {
-    // Verificar inmediatamente
+    // Verificar solo una vez al cargar
     checkNotifications();
 
-    // Luego cada 30 segundos
-    const interval = setInterval(checkNotifications, 30000);
+    // Polling deshabilitado - no se ejecuta cada 30 segundos
+    console.log('🔇 Polling de notificaciones deshabilitado');
 
-    console.log('🚀 Polling de notificaciones iniciado (cada 30s)');
-
-    return () => {
-      clearInterval(interval);
-      console.log('⏹️ Polling de notificaciones detenido');
-    };
-  }, [checkNotifications]);
+    // No hay cleanup necesario ya que no hay interval
+  }, []); // Sin dependencias para evitar recreación
 
   // Limpiar error después de 5 segundos
   useEffect(() => {
