@@ -6,11 +6,15 @@ import AdminLayout from './layouts/AdminLayout.jsx'
 
 function RequireAuth({ children }) {
   const location = useLocation()
-  let token = null
-  try { token = localStorage.getItem('token') || localStorage.getItem('auth_token') } catch {}
-  if (!token) {
+
+  // Verificar si hay sesión activa (cookies de Django)
+  const hasSession = document.cookie.includes('sessionid=')
+  const hasUsername = localStorage.getItem('username')
+
+  if (!hasSession || !hasUsername) {
     return <Navigate to="/login" state={{ from: location }} replace />
   }
+
   return children
 }
 
